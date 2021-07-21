@@ -13,6 +13,8 @@
         <button type="button" onclick='startSession()'>Start Session</button>
         <p>Progress: <span id="sessionProgress"></span></p>
         <button type="button" onclick='getStatistics()'>Get Statistics</button>
+        <div id="statistics">
+        </div>
     </div>
 <script>
     var started = false;
@@ -88,7 +90,77 @@
     }
     
     function getStatistics(){
+        var session_id = document.getElementById("sessionId").innerText;
+        var url = "session/"+session_id+"/statistics";
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+
+        xhr.onreadystatechange = async function(){
+            if(xhr.readyState === 4){
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                var data = JSON.parse(xhr.responseText);
+                var overview = document.createElement("pre");
+                overview.innerHTML = "Presion:"+data["precision"] +"\n" + "Accuracy: "+data["accuracy"];
+                var statisticsContainer = document.getElementById("statistics");
+                statisticsContainer.append(overview);
+                statisticsContainer.append(createTable(data));
+                
+            }
+        }
+        xhr.send();
         
+    }
+    
+    function createTable(data){
+    
+        var table = document.createElement('table');
+        var thead = document.createElement('thead');
+        var tbody = document.createElement('tbody');
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        
+        let row_1 = document.createElement('tr');
+        let heading_1 = document.createElement('th');
+        heading_1.innerHTML = "Filename";
+        let heading_2 = document.createElement('th');
+        heading_2.innerHTML = "Detected Text";
+        let heading_3 = document.createElement('th');
+        heading_3.innerHTML = "Correct";
+
+        row_1.appendChild(heading_1);
+        row_1.appendChild(heading_2);
+        row_1.appendChild(heading_3);
+        thead.appendChild(row_1);
+        
+        
+        var imgResults = data["img_results"];
+        for (let key in imgResults) {
+            var imgResult = imgResults[key];
+            console.log(imgResult);
+            var results = imgResult["results"];
+            var barcodeText = "";
+            for (var j=0;j<results.length;j++){
+                var result = results[j];
+                barcodeText = barcodeText +", "+ result["barcodeText"];
+            }
+            // Creating and adding data to second row of the table
+            var row = document.createElement('tr');
+            var c1 = document.createElement('td');
+            c1.innerHTML = key;
+            var c2 = document.createElement('td');
+            c2.innerHTML = barcodeText;
+            var c3 = document.createElement('td');
+            c3.innerHTML = "True";
+
+            row.appendChild(c1);
+            row.appendChild(c2);
+            row.appendChild(c3);
+            tbody.appendChild(row);
+           
+        }
+        return table;
     }
 </script>
 

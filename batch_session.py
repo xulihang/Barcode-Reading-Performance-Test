@@ -43,7 +43,7 @@ class Batch_session():
             f.close()
             self.processed=self.processed+1
             
-    def start_reading(self):
+    def start_reading(self, engine=""):
         _thread.start_new_thread(self.decode_and_save_results,())
             
     def load_files_list(self):
@@ -58,13 +58,11 @@ class Batch_session():
     def completed(self, engine=""):
         imgs_list = {}
         json_list = {}
-        for filename in os.listdir(self.img_folder):
-            name, ext = os.path.splitext(filename)
-            if ext.lower() in ('.png','.jpg','.jpeg','.bmp'):
-                imgs_list[filename] = ""
-                json_filename = self.get_json_filename(filename, engine)
-                if os.path.exists(os.path.join(self.img_folder,json_filename)):
-                    json_list[json_filename] = ""
+        for filename in self.files_list:
+            imgs_list[filename] = ""
+            json_filename = self.get_json_filename(filename, engine)
+            if os.path.exists(os.path.join(self.img_folder,json_filename)):
+                json_list[json_filename] = ""
         for img_filename in imgs_list:
             if self.get_json_filename(img_filename,engine) not in json_list:
                 return False
@@ -81,15 +79,56 @@ class Batch_session():
             return filename+"-"+engine+".json"
         else:
             return filename+".json"
-            
-    def get_statistics():
-        return ""
+    
+    def get_ground_truth(self, filename):
+        return filename.split("-")[0]
+    
+    def get_statistics(self, engine=""):
+        data = {}
+        img_results = {}
+        total_elapsedTime = 0
+        undetected = 0
+        wrong_detected = 0
+        for filename in self.files_list:
+            json_filename = self.get_json_filename(filename, engine)
+            json_path = os.path.join(self.img_folder,json_filename)
+            if os.path.exists(json_path):
+                print(json_filename)
+                f = open(json_path,"r",encoding="utf-8")
+                image_decoding_result = json.loads(f.read())
+                img_results[filename] = image_decoding_result
+                if "results" in image_decoding_result:
+                    results=image_decoding_result["results"]
+                    if len(results)==0:
+                        undetected=undetected+1
+                    else:
+                        ground_truth = self.get_ground_truth(filename)
+                        for result in results:
+                            barcode_text = result["barcodeText"]
+                        total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
+                        if ground_truth!=barcode_text:
+                            wrong_detected=wrong_detected+1
+                else:
+                    undetected=undetected+1
+        total = len(self.files_list)
+        correctly_detected = total - undetected - wrong_detected
+        data["img_results"] = img_results
+        data["total"] = total
+        data["undetected"] = undetected
+        data["wrong_detected"] = wrong_detected
+        
+        data["precision"] = correctly_detected / (total - undetected)
+        data["accuracy"] = correctly_detected / total
+        data["time_elapsed"] = total_elapsedTime
+        data["average_time"] = total_elapsedTime / total
+        return data
         
         
 if __name__ == '__main__':
     session = Batch_session("./")
     if (session.completed()):
         print("Already completed")
+        print(session.get_statistics())
     else:
         session.start_reading()
         while session.completed()==False:

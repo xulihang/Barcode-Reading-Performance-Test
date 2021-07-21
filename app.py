@@ -43,7 +43,7 @@ def get_session_progress(session_id):
 def get_session_statistics(session_id):
     if session_id in sessions:
         session = sessions[session_id]
-        return ""
+        return session.get_statistics()
     else:
         return "Not exist"
 
