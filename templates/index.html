@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <meta charset="utf-8"> 
+    <title>Performance Test</title> 
+</head>
+<body>
+    Image Folder Path: <input type="text" id="folderpath" name="folderpath" value="D:\test\BarcodePerformance\dataset"><br>
+    <button type="button" onclick='createSession()'>Create Session</button>
+    
+    <div id="session">
+        <p>Session: <span id="sessionId"></span></p>
+        <button type="button" onclick='startSession()'>Start Session</button>
+        <p>Progress: <span id="sessionProgress"></span></p>
+        <button type="button" onclick='getStatistics()'>Get Statistics</button>
+    </div>
+<script>
+    var started = false;
+    function createSession(){
+        var url = "session/create";
+        var xhr = new XMLHttpRequest();
+        var pay_load = {};
+        pay_load["folderpath"] = document.getElementById("folderpath").value;
+
+        xhr.open('POST', url);
+        xhr.setRequestHeader('content-type', 'application/json'); 
+
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState === 4){
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                if (xhr.status==200){
+                    var session_id = JSON.parse(xhr.responseText)["session_id"];
+                    document.getElementById("sessionId").innerText=session_id;
+                }
+            }
+        }
+        xhr.send(JSON.stringify(pay_load));
+    }
+    
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    function startSession(){
+        if (started==true) {
+            return;
+        }
+        started = true;
+        var session_id = document.getElementById("sessionId").innerText;
+        var url = "session/"+session_id+"/start";
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+
+        xhr.onreadystatechange = async function(){
+            if(xhr.readyState === 4){
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                checkProgress();
+            }
+        }
+        xhr.send();
+    }
+    
+    function checkProgress(){
+        var session_id = document.getElementById("sessionId").innerText;
+        var url = "session/"+session_id+"/progress";
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+
+        xhr.onreadystatechange = async function(){
+            if(xhr.readyState === 4){
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                var progress = xhr.responseText;
+                
+                if (progress.split("/")[0]!=progress.split("/")[1]){
+                    document.getElementById("sessionProgress").innerText = progress;
+                    await sleep(1000);
+                    checkProgress();
+                }else{
+                    document.getElementById("sessionProgress").innerText = "Done!";
+                }
+                
+            }
+        }
+        xhr.send();
+    }
+    
+    function getStatistics(){
+        
+    }
+</script>
+
+
+</body>
+</html>
