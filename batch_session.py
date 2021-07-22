@@ -38,16 +38,23 @@ class Batch_session():
     def decode_and_save_results(self, engine=""):
         self.processed = 0
         for filename in self.files_list:
-            
             start_time = time.time()
+            result_dict = {}
             results = []
             try:
-                results = self.reader.decode_file(os.path.join(self.img_folder,filename),engine=engine)
+                result_dict = self.reader.decode_file(os.path.join(self.img_folder,filename),engine=engine)
             except:
                 print("Error")
             end_time = time.time()
+            elapsedTime = int((end_time - start_time) * 1000)
+            
+            if "results" in result_dict:
+                results = result_dict["results"]
+            if "elapsedTime" in result_dict:
+                elapsedTime = result_dict["elapsedTime"]
+            
             json_dict = {}
-            json_dict["elapsedTime"] = int((end_time - start_time) * 1000)
+            json_dict["elapsedTime"] = elapsedTime
             json_dict["results"] = results
             json_string = json.dumps(json_dict, indent="\t")
             
@@ -59,8 +66,6 @@ class Batch_session():
     def start_reading(self, engine=""):
         if engine=="commandline":
             self.decode_and_save_results(engine)
-            #print(engine)
-            #threading.Thread(target=self.decode_and_save_results, args=(engine)).start()
         else:
             threading.Thread(target=self.decode_and_save_results, args=(engine)).start()
         print("started")

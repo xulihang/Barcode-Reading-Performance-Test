@@ -8,6 +8,7 @@ class BarcodeReaderX():
         self.dbr.init_license("t0069fQAAADni8mnJeS0cnoLp85KEXFCh78ltXDT3x52OWWW0qsnvVBOkG7nz+do12XxdqoHCJQ+U+Bbg+RPP/7nyQsQkDtOC")
     
     def decode_file(self, img_path, engine=""):
+        result_dict = {}
         results = []        
         if engine == "":
             text_results = self.dbr.decode_file(img_path)
@@ -30,10 +31,13 @@ class BarcodeReaderX():
                 json_object = json.loads(output)
                 if "results" in json_object:
                     results=json_object["results"]
+                if "elapsedTime" in json_object:
+                    result_dict["elapsedTime"]=json_object["elapsedTime"]
                 p.kill()
             except:
                 print("Error")
-        return results
+        result_dict["results"] = results
+        return result_dict
         
 if __name__ == '__main__':
     reader = BarcodeReaderX()
