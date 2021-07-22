@@ -4,17 +4,35 @@ import json
 import os
 import time
 import _thread
+import uuid
 
 class Batch_session():
-    def __init__(self, img_folder, template=None):
+    def __init__(self, img_folder, output_folder, template=None,session_id=None):
         self.img_folder = img_folder
+        self.output_folder = output_folder
+        self.id = uuid.uuid1().hex
+        
+        if session_id != None:
+            self.id = session_id
+        self.json_folder = os.path.join(self.output_folder,self.id)
+        if os.path.exists(self.json_folder) == False:
+            os.mkdir(self.json_folder)
+            
+        f = open(os.path.join(self.json_folder,"img_folder"),"w")
+        f.write(img_folder)
+        f.close()
+        
         self.files_list = []
         self.processed = 0
         self.reader = BarcodeReader()
         self.reader.init_license("t0069fQAAADni8mnJeS0cnoLp85KEXFCh78ltXDT3x52OWWW0qsnvVBOkG7nz+do12XxdqoHCJQ+U+Bbg+RPP/7nyQsQkDtOC")
         self.load_files_list()
     
+    def get_id(self):
+        return self.id
+    
     def decode_and_save_results(self):
+        self.processed = 0
         for filename in self.files_list:
             
             start_time = time.time()
@@ -38,7 +56,8 @@ class Batch_session():
             json_dict["elapsedTime"] = int((end_time - start_time) * 1000)
             json_dict["results"] = results
             json_string = json.dumps(json_dict, indent="\t")
-            f = open(os.path.join(self.img_folder,filename+".json"),"w")
+            
+            f = open(os.path.join(self.json_folder,filename+".json"),"w")
             f.write(json_string)
             f.close()
             self.processed=self.processed+1
@@ -58,10 +77,11 @@ class Batch_session():
     def completed(self, engine=""):
         imgs_list = {}
         json_list = {}
+
         for filename in self.files_list:
             imgs_list[filename] = ""
             json_filename = self.get_json_filename(filename, engine)
-            if os.path.exists(os.path.join(self.img_folder,json_filename)):
+            if os.path.exists(os.path.join(self.json_folder,json_filename)):
                 json_list[json_filename] = ""
         for img_filename in imgs_list:
             if self.get_json_filename(img_filename,engine) not in json_list:
@@ -89,11 +109,12 @@ class Batch_session():
         total_elapsedTime = 0
         undetected = 0
         wrong_detected = 0
+        
         for filename in self.files_list:
             json_filename = self.get_json_filename(filename, engine)
-            json_path = os.path.join(self.img_folder,json_filename)
+            json_path = os.path.join(self.json_folder,json_filename)
             if os.path.exists(json_path):
-                print(json_filename)
+                print(json_path)
                 f = open(json_path,"r",encoding="utf-8")
                 image_decoding_result = json.loads(f.read())
                 img_results[filename] = image_decoding_result
@@ -125,7 +146,7 @@ class Batch_session():
         
         
 if __name__ == '__main__':
-    session = Batch_session("./")
+    session = Batch_session("./","./tmp",session_id="c7edc4c5ea9011eb8965e84e068e29b8")
     if (session.completed()):
         print("Already completed")
         print(session.get_statistics())
