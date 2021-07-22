@@ -17,6 +17,11 @@
 <body>
     <div id="session">
         <p>Session: <span id="sessionId"></span></p>
+        Engine: 
+        <select id="engine">
+          <option value="dynamsoft">DBR</option>
+          <option value="commandline">CommandLine</option>
+        </select>
         <button type="button" onclick='startSession()'>Start Session</button>
         <p>Progress: <span id="sessionProgress"></span></p>
         <button type="button" onclick='getStatistics()'>Get Statistics</button>
@@ -24,8 +29,13 @@
         </div>
     </div>
 <script>
-    var started = false;
     get_session_id();
+    
+    function get_engine(){
+        var engine =  document.getElementById("engine").value;
+        console.log(engine);
+        return engine;
+    }
     
     function get_session_id(){
         sessionId = getUrlParam("id");
@@ -44,12 +54,8 @@
     }
     
     function startSession(){
-        if (started==true) {
-            return;
-        }
-        started = true;
         var session_id = document.getElementById("sessionId").innerText;
-        var url = "session/"+session_id+"/start";
+        var url = "session/"+session_id+"/start/"+get_engine();
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url);
 
@@ -90,7 +96,7 @@
     
     function getStatistics(){
         var session_id = document.getElementById("sessionId").innerText;
-        var url = "session/"+session_id+"/statistics";
+        var url = "session/"+session_id+"/statistics/"+get_engine();
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url);
 

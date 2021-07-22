@@ -49,13 +49,13 @@ def get_session(session_id):
         sessions[session_id]=session
     return session
 
-@app.route('/session/<session_id>/start')
-def start_session(session_id):
+@app.route('/session/<session_id>/start/<engine>')
+def start_session(session_id, engine):
     session = get_session(session_id)
     if session == None:
         return "Not exist"
     print(session)
-    session.start_reading()
+    session.start_reading(engine=process_engine(engine))
     return "Started"    
    
 @app.route('/session/<session_id>/progress')
@@ -66,12 +66,19 @@ def get_session_progress(session_id):
     return session.get_process()    
 
    
-@app.route('/session/<session_id>/statistics')
-def get_session_statistics(session_id):
+@app.route('/session/<session_id>/statistics/<engine>')
+def get_session_statistics(session_id, engine):
     session = get_session(session_id)
     if session == None:
         return "Not exist"
-    return session.get_statistics()
+    return session.get_statistics(engine=process_engine(engine))
+    
+def process_engine(engine):
+    print(engine)
+    if engine == "dynamsoft":
+        return ""
+    else:
+        return engine
 
 if __name__ == '__main__':
     app.run()

@@ -1,11 +1,11 @@
 #coding=utf-8
-from dbr import *
 import json
 import os
 import time
-import _thread
+import threading
 import uuid
 from shutil import copyfile
+from barcode_reader import BarcodeReaderX
 
 class Batch_session():
     def __init__(self, img_folder, output_folder, template=None,session_id=None):
@@ -23,10 +23,10 @@ class Batch_session():
         f.write(img_folder)
         f.close()
         
+        self.reader = BarcodeReaderX()
+        
         self.files_list = []
         self.processed = 0
-        self.reader = BarcodeReader()
-        self.reader.init_license("t0069fQAAADni8mnJeS0cnoLp85KEXFCh78ltXDT3x52OWWW0qsnvVBOkG7nz+do12XxdqoHCJQ+U+Bbg+RPP/7nyQsQkDtOC")
         self.load_files_list()
     
     def get_id(self):
@@ -35,39 +35,35 @@ class Batch_session():
     def get_img_folder(self):
         return self.img_folder
     
-    def decode_and_save_results(self):
+    def decode_and_save_results(self, engine=""):
         self.processed = 0
         for filename in self.files_list:
             
             start_time = time.time()
-            text_results = None
+            results = []
             try:
-                text_results = self.reader.decode_file(os.path.join(self.img_folder,filename))
+                results = self.reader.decode_file(os.path.join(self.img_folder,filename),engine=engine)
             except:
                 print("Error")
             end_time = time.time()
             json_dict = {}
-            results = []
-            index=0
-            if text_results!=None:
-                for tr in text_results:
-                    result = {}
-                    result["barcodeFormat"] = tr.barcode_format_string
-                    result["barcodeText"] = tr.barcode_text
-                    result["confidence"] = tr.extended_results[0].confidence
-                    results.append(result)
-                    index=index+1
             json_dict["elapsedTime"] = int((end_time - start_time) * 1000)
             json_dict["results"] = results
             json_string = json.dumps(json_dict, indent="\t")
             
-            f = open(os.path.join(self.json_folder,filename+".json"),"w")
+            f = open(os.path.join(self.json_folder,self.get_json_filename(filename, engine)),"w")
             f.write(json_string)
             f.close()
             self.processed=self.processed+1
             
     def start_reading(self, engine=""):
-        _thread.start_new_thread(self.decode_and_save_results,())
+        if engine=="commandline":
+            self.decode_and_save_results(engine)
+            #print(engine)
+            #threading.Thread(target=self.decode_and_save_results, args=(engine)).start()
+        else:
+            threading.Thread(target=self.decode_and_save_results, args=(engine)).start()
+        print("started")
             
     def load_files_list(self):
         for filename in os.listdir(self.img_folder):
