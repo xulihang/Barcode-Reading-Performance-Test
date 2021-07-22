@@ -5,6 +5,7 @@ import os
 import time
 import _thread
 import uuid
+from shutil import copyfile
 
 class Batch_session():
     def __init__(self, img_folder, output_folder, template=None,session_id=None):
@@ -118,23 +119,32 @@ class Batch_session():
             json_path = os.path.join(self.json_folder,json_filename)
             if os.path.exists(json_path):
                 print(json_path)
+                failed = False
                 f = open(json_path,"r",encoding="utf-8")
                 image_decoding_result = json.loads(f.read())
                 ground_truth = self.get_ground_truth(filename)
-                image_decoding_result["ground_truth"] = ground_truth
                 img_results[filename] = image_decoding_result
                 if "results" in image_decoding_result:
                     results=image_decoding_result["results"]
                     if len(results)==0:
                         undetected=undetected+1
+                        failed = True
                     else:
+                        barcode_text = ""
                         for result in results:
-                            barcode_text = result["barcodeText"]
+                            barcode_text = barcode_text + " " + result["barcodeText"]
                         total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
-                        if ground_truth!=barcode_text:
+                        if barcode_text.find(ground_truth) == -1:
                             wrong_detected=wrong_detected+1
+                            failed = True
                 else:
                     undetected=undetected+1
+                    failed = True
+                    
+                image_decoding_result["ground_truth"] = ground_truth
+                image_decoding_result["failed"] = failed
+                if failed == True:
+                    self.copy_undetected_to_failed_folder(filename,engine)
                 
         total = len(self.files_list)
         correctly_detected = total - undetected - wrong_detected
@@ -148,6 +158,17 @@ class Batch_session():
         data["time_elapsed"] = total_elapsedTime
         data["average_time"] = total_elapsedTime / total
         return data
+        
+    def copy_undetected_to_failed_folder(self, filename, engine=""):
+        img_path = os.path.join(self.img_folder,filename)
+        if engine == "":
+            failed_folder_path = os.path.join(self.json_folder,"failed")
+        else:
+            failed_folder_path = os.path.join(self.json_folder,"failed-" + engine)
+        if os.path.exists(failed_folder_path) == False:
+            os.mkdir(failed_folder_path)
+        target = os.path.join(failed_folder_path,filename)
+        copyfile(img_path,target)
         
         
 if __name__ == '__main__':

@@ -100,7 +100,13 @@
                 console.log(xhr.responseText);
                 var data = JSON.parse(xhr.responseText);
                 var overview = document.createElement("pre");
-                overview.innerHTML = "Presion:"+data["precision"] +"\n" + "Accuracy: "+data["accuracy"];
+                var content = "Presion:"+ data["precision"];
+                content = content + "\n" + "Accuracy: " + data["accuracy"];
+                content = content + "\nTotal: " + data["total"];
+                content = content + "\nUndetected: " + data["undetected"];
+                content = content + "\nWrongly detected: " + data["wrong_detected"];
+                
+                overview.innerHTML = content;
                 var statisticsContainer = document.getElementById("statistics");
                 statisticsContainer.append(overview);
                 statisticsContainer.append(createTable(data));
@@ -145,7 +151,6 @@
         for (let key in imgResults) {
             index = index+1;
             var imgResult = imgResults[key];
-            console.log(imgResult);
             var groundTruth = imgResult["ground_truth"];
             var results = imgResult["results"];
             var barcodeText = "";
@@ -172,10 +177,12 @@
             var c3 = document.createElement('td');
             c3.innerHTML = groundTruth;
             
+            var failed = imgResult["failed"];
             var correct = "true";
-            if (barcodeText.indexOf(groundTruth) == -1){
+            if (failed == true){
                 correct = "<span class=\"false\">false</span>";
             }
+
             var c4 = document.createElement('td');
             c4.innerHTML = correct;
             row.appendChild(c0);
