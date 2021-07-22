@@ -13,6 +13,14 @@ tmp_path="./tmp"
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/session/<session_id>/image/<filename>')    
+def get_image(session_id, filename):
+    session = get_session(session_id)
+    if session == None:
+        return "Not exist"
+    img_folder = session.get_img_folder()
+    return send_file(os.path.join(img_folder,filename))
    
 @app.route('/session/create', methods=['POST'])
 def create_session():

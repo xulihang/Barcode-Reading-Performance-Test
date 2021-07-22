@@ -30,6 +30,9 @@ class Batch_session():
     
     def get_id(self):
         return self.id
+        
+    def get_img_folder(self):
+        return self.img_folder
     
     def decode_and_save_results(self):
         self.processed = 0
@@ -117,13 +120,14 @@ class Batch_session():
                 print(json_path)
                 f = open(json_path,"r",encoding="utf-8")
                 image_decoding_result = json.loads(f.read())
+                ground_truth = self.get_ground_truth(filename)
+                image_decoding_result["ground_truth"] = ground_truth
                 img_results[filename] = image_decoding_result
                 if "results" in image_decoding_result:
                     results=image_decoding_result["results"]
                     if len(results)==0:
                         undetected=undetected+1
                     else:
-                        ground_truth = self.get_ground_truth(filename)
                         for result in results:
                             barcode_text = result["barcodeText"]
                         total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
@@ -131,6 +135,7 @@ class Batch_session():
                             wrong_detected=wrong_detected+1
                 else:
                     undetected=undetected+1
+                
         total = len(self.files_list)
         correctly_detected = total - undetected - wrong_detected
         data["img_results"] = img_results
