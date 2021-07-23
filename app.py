@@ -19,7 +19,7 @@ def get_image(session_id, filename):
     session = get_session(session_id)
     if session == None:
         return "Not exist"
-    img_folder = session.get_img_folder()
+    img_folder = session.img_folder
     return send_file(os.path.join(img_folder,filename))
    
 @app.route('/session/create', methods=['POST'])
@@ -32,7 +32,7 @@ def create_session():
             if os.path.exists(tmp_path) == False:
                 os.mkdir(tmp_path)
             session = Batch_session(img_folder,tmp_path)
-            session_id = session.get_id()
+            session_id = session.id
             sessions[session_id]=session
             return {"status":"success","session_id":session_id}
 

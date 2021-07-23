@@ -29,12 +29,6 @@ class Batch_session():
         self.processed = 0
         self.load_files_list()
     
-    def get_id(self):
-        return self.id
-        
-    def get_img_folder(self):
-        return self.img_folder
-    
     def decode_and_save_results(self, engine=""):
         self.processed = 0
         for filename in self.files_list:
