@@ -1,17 +1,39 @@
 from dbr import *
-from subprocess import Popen, PIPE, STDOUT
 import json
+import subprocess
+import os
+import zmq
 
 class BarcodeReaderX():
     def __init__(self):
         self.dbr = BarcodeReader()
         self.dbr.init_license("t0069fQAAADni8mnJeS0cnoLp85KEXFCh78ltXDT3x52OWWW0qsnvVBOkG7nz+do12XxdqoHCJQ+U+Bbg+RPP/7nyQsQkDtOC")
+        if os.path.exists("template.json"):
+            print("Found template")
+            self.dbr.init_runtime_settings_with_file("template.json")
+        self.context = zmq.Context()
+        self.process = None
+
+        socket = self.context.socket(zmq.REQ)
+        socket.connect("tcp://localhost:5556")
+        socket.send(b"Hello")
+        message = ""
+        try:
+            message = socket.recv(flags=zmq.NOBLOCK)
+        except Exception as e:
+            print(e)
+            f = open("commandline_path","r")
+            commandline_path = f.read()
+            f.close()
+            self.process = subprocess.Popen([commandline_path.strip()], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            
     
     def decode_file(self, img_path, engine=""):
         result_dict = {}
-        results = []        
+        results = []    
         if engine == "":
             text_results = self.dbr.decode_file(img_path)
+            
             if text_results!=None:
                 for tr in text_results:
                     result = {}
@@ -21,26 +43,22 @@ class BarcodeReaderX():
                     results.append(result)
         elif engine == "commandline":
             try:
-                f = open("commandline_path","r")
-                commandline_path = f.read()
-                f.close()
-                p = Popen([commandline_path.strip(), img_path.strip()], stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
-                #output = p.stdout.read()
-                output = p.communicate()[0]
-                print(output)
-                json_object = json.loads(output)
+                socket = self.context.socket(zmq.REQ)
+                socket.connect("tcp://localhost:5556")
+                socket.send(bytes(img_path,"utf-8"))
+                message = socket.recv()
+                json_object = json.loads(message.decode("utf-8"))
                 if "results" in json_object:
                     results=json_object["results"]
                 if "elapsedTime" in json_object:
                     result_dict["elapsedTime"]=json_object["elapsedTime"]
-                p.kill()
-            except:
-                print("Error")
+            except Exception as e:
+                print(e)
         result_dict["results"] = results
         return result_dict
         
 if __name__ == '__main__':
     reader = BarcodeReaderX()
-    results = reader.decode_file("./test.jpg", engine="commandline")
+    results = reader.decode_file("D:\\test\\BarcodePerformance\\9002759812614-01_N95-2592x1944.jpg",engine="commandline")
     print(results)
     

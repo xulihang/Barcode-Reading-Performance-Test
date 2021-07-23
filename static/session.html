@@ -114,6 +114,7 @@
                 
                 overview.innerHTML = content;
                 var statisticsContainer = document.getElementById("statistics");
+                statisticsContainer.innerHTML = "";
                 statisticsContainer.append(overview);
                 statisticsContainer.append(createTable(data));
                 

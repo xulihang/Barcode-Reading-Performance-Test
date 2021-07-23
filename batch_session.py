@@ -64,10 +64,7 @@ class Batch_session():
             self.processed=self.processed+1
             
     def start_reading(self, engine=""):
-        if engine=="commandline":
-            self.decode_and_save_results(engine)
-        else:
-            threading.Thread(target=self.decode_and_save_results, args=(engine)).start()
+        threading.Thread(target=self.decode_and_save_results, args=(engine,)).start()
         print("started")
             
     def load_files_list(self):
