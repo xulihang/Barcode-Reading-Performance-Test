@@ -86,6 +86,19 @@ def process_engine(engine):
         return ""
     else:
         return engine
+        
+@app.route('/session/list/')
+def get_session_list():
+    sessions_dict = {}
+    for filename in os.listdir(tmp_path):
+        session_dir = os.path.join(tmp_path,filename)
+        img_folder_conf = os.path.join(session_dir,"img_folder")
+        if os.path.exists(img_folder_conf):
+            f = open(img_folder_conf,"r")
+            folder_path = f.read()
+            f.close()
+            sessions_dict[filename] = folder_path
+    return sessions_dict
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

@@ -9,7 +9,16 @@
     <button type="button" onclick='createSession()'>Create Session</button>
     <p>A new window will open.</p>
     
+    <div>
+        Previous sessions:
+        <div id="sessions">
+        
+        </div>
+    </div>
+    
 <script>
+
+    loadSessionList();
     function createSession(){
         var url = "session/create";
         var xhr = new XMLHttpRequest();
@@ -30,6 +39,35 @@
             }
         }
         xhr.send(JSON.stringify(pay_load));
+    }
+    
+    function loadSessionList(){
+        var url = "session/list";
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState === 4){
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                var sessions = JSON.parse(xhr.responseText);
+                console.log(sessions);
+                var sessionsContainer = document.getElementById("sessions");
+                var ul = document.createElement("ul");
+                for (let key in sessions) {
+                
+                    var a = document.createElement("a");
+                    a.href = "/session.html?id="+key;
+                    a.target = "_blank";
+                    a.innerText = key + " : " + sessions[key];
+                    var li = document.createElement("li");
+                    li.append(a);
+                    ul.append(li);
+                }
+                sessionsContainer.append(ul);
+            }
+        }
+        xhr.send();
     }
 </script>
 
