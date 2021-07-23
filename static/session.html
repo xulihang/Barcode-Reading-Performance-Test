@@ -111,6 +111,8 @@
                 content = content + "\nTotal: " + data["total"];
                 content = content + "\nUndetected: " + data["undetected"];
                 content = content + "\nWrongly detected: " + data["wrong_detected"];
+                content = content + "\nTime elapsed: " + data["time_elapsed"];
+                content = content + "\nAverage time: " + data["average_time"];
                 
                 overview.innerHTML = content;
                 var statisticsContainer = document.getElementById("statistics");
@@ -133,26 +135,13 @@
         table.appendChild(thead);
         table.appendChild(tbody);
         
+        var headers = ["No.","Filename","Detected Text", "Ground Truth","Barcode Format","Time","Confidence","Correct", "Note"];
         let row_1 = document.createElement('tr');
-        let heading_0 = document.createElement('th');
-        heading_0.innerHTML = "No.";
-        let heading_1 = document.createElement('th');
-        heading_1.innerHTML = "Filename";
-        let heading_2 = document.createElement('th');
-        heading_2.innerHTML = "Detected Text";
-        let heading_3 = document.createElement('th');
-        heading_3.innerHTML = "Ground Truth";
-        let heading_4 = document.createElement('th');
-        heading_4.innerHTML = "Correct";
-        let heading_5 = document.createElement('th');
-        heading_5.innerHTML = "Note";
-
-        row_1.appendChild(heading_0);
-        row_1.appendChild(heading_1);
-        row_1.appendChild(heading_2);
-        row_1.appendChild(heading_3);
-        row_1.appendChild(heading_4);
-        row_1.appendChild(heading_5);
+        for (var i =0;i<headers.length;i++){
+            let heading = document.createElement('th');
+            heading.innerHTML = headers[i];
+            row_1.appendChild(heading);
+        }
         thead.appendChild(row_1);
         
         
@@ -164,28 +153,39 @@
             var groundTruth = imgResult["ground_truth"];
             var results = imgResult["results"];
             var barcodeText = "";
+            var barcodeFormat = "";
+            var confidence = "";
             for (var j=0;j<results.length;j++){
                 var result = results[j];
                 if (j>0){
                     barcodeText = barcodeText + ", "
+                    barcodeFormat = barcodeFormat + ", "
+                    confidence = confidence + ", "
                 }
                 barcodeText = barcodeText + result["barcodeText"];
+                barcodeFormat =  barcodeFormat + result["barcodeFormat"];
+                confidence = confidence + result["confidence"] + "";
             }
-            // Creating and adding data to second row of the table
+
             var row = document.createElement('tr');
-            var c0 = document.createElement('td');
-            c0.innerHTML = index;
-            var c1 = document.createElement('td');
-            //c1.innerHTML = key;
+            
+            var data = [];
+            data.push(index);
+
             var a = document.createElement("a");
             a.href = "/session/"+ session_id +"/image/" + key;
             a.target = "_blank";
             a.innerText = key;
-            c1.append(a);
-            var c2 = document.createElement('td');
-            c2.innerHTML = barcodeText;
-            var c3 = document.createElement('td');
-            c3.innerHTML = groundTruth;
+            data.push(a.outerHTML)
+            
+            data.push(barcodeText);
+            data.push(groundTruth);
+            data.push(barcodeFormat);
+            data.push(imgResult["elapsedTime"]);
+            if (confidence.indexOf("undefined")!=-1){
+                confidence = "";
+            }
+            data.push(confidence);
             
             var failed = imgResult["failed"];
             var correct = "true";
@@ -193,23 +193,20 @@
                 correct = "<span class=\"false\">false</span>";
             }
 
-            var c4 = document.createElement('td');
-            c4.innerHTML = correct;
+            data.push(correct);
             
             var note = "";
-            var c5 = document.createElement('td');
             if (imgResult["wrong_detected"]==true){
                 note = "wrong result";
             }
-            c5.innerHTML = note;
+            data.push(note);
             
+            for (var i=0;i<data.length;i++) {
+                var c = document.createElement('td');
+                c.innerHTML = data[i];
+                row.appendChild(c);
+            }
             
-            row.appendChild(c0);
-            row.appendChild(c1);
-            row.appendChild(c2);
-            row.appendChild(c3);
-            row.appendChild(c4);
-            row.appendChild(c5);
             tbody.appendChild(row);
            
         }

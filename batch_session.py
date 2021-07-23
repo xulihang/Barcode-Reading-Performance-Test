@@ -116,7 +116,6 @@ class Batch_session():
             json_filename = self.get_json_filename(filename, engine)
             json_path = os.path.join(self.json_folder,json_filename)
             if os.path.exists(json_path):
-                print(json_path)
                 failed = False
                 f = open(json_path,"r",encoding="utf-8")
                 image_decoding_result = json.loads(f.read())
