@@ -102,8 +102,14 @@ class Batch_session():
         else:
             return filename+".json"
     
-    def get_ground_truth(self, filename):
-        return filename.split("-")[0]
+    def get_ground_truth_list(self, filename):
+        txt_path = os.path.join(self.img_folder,filename+".txt")
+        if os.path.exists(txt_path):
+            f = open(txt_path, "r")
+            ground_truth_list=json.loads(f.read())
+            f.close()
+            return ground_truth_list
+        return []
     
     def get_statistics(self, engine=""):
         data = {}
@@ -119,7 +125,7 @@ class Batch_session():
                 failed = False
                 f = open(json_path,"r",encoding="utf-8")
                 image_decoding_result = json.loads(f.read())
-                ground_truth = self.get_ground_truth(filename)
+                ground_truth_list = self.get_ground_truth_list(filename)
                 img_results[filename] = image_decoding_result
                 if "results" in image_decoding_result:
                     results=image_decoding_result["results"]
@@ -131,15 +137,18 @@ class Batch_session():
                         for result in results:
                             barcode_text = barcode_text + " " + result["barcodeText"]
                         total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
-                        if barcode_text.find(ground_truth) == -1:
-                            wrong_detected=wrong_detected+1
-                            image_decoding_result["wrong_detected"] = True
-                            failed = True
+                        
+                        for ground_truth in ground_truth_list:
+                            if barcode_text.find(ground_truth) == -1:
+                                wrong_detected=wrong_detected+1
+                                image_decoding_result["wrong_detected"] = True
+                                failed = True
+                                exit
                 else:
                     undetected=undetected+1
                     failed = True
                     
-                image_decoding_result["ground_truth"] = ground_truth
+                image_decoding_result["ground_truth"] = ground_truth_list
                 image_decoding_result["failed"] = failed
                 if failed == True:
                     self.copy_undetected_to_failed_folder(filename,engine)
