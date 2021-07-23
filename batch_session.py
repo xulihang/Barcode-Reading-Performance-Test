@@ -28,10 +28,15 @@ class Batch_session():
         self.files_list = []
         self.processed = 0
         self.load_files_list()
+        self.reading = True;
     
     def decode_and_save_results(self, engine=""):
         self.processed = 0
         for filename in self.files_list:
+            print("Decoding "+filename)
+            if self.reading == False:
+                print("Stopped")
+                return
             start_time = time.time()
             result_dict = {}
             results = []
@@ -58,8 +63,13 @@ class Batch_session():
             self.processed=self.processed+1
             
     def start_reading(self, engine=""):
+        self.reading = True
+        self.reader.start_commandline_zmq_server_if_unstarted()
         threading.Thread(target=self.decode_and_save_results, args=(engine,)).start()
-        print("started")
+        
+    def stop_reading(self):
+        self.reader.stop_commandline_zmq_server_if_started()
+        self.reading = False
             
     def load_files_list(self):
         for filename in os.listdir(self.img_folder):

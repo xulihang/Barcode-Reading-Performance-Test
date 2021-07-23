@@ -53,10 +53,17 @@ def get_session(session_id):
 def start_session(session_id, engine):
     session = get_session(session_id)
     if session == None:
-        return "Not exist"
-    print(session)
+        return "Not exist"    
     session.start_reading(engine=process_engine(engine))
-    return "Started"    
+    return "Started"
+    
+@app.route('/session/<session_id>/stop/<engine>')
+def stop_session(session_id, engine):
+    session = get_session(session_id)
+    if session == None:
+        return "Not exist"
+    session.stop_reading()
+    return "Stopped"
    
 @app.route('/session/<session_id>/progress')
 def get_session_progress(session_id):

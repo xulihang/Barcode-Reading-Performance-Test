@@ -22,7 +22,7 @@
           <option value="dynamsoft">DBR</option>
           <option value="commandline">CommandLine</option>
         </select>
-        <button type="button" onclick='startSession()'>Start Session</button>
+        <button type="button" id="decodingButton" onclick='handleDecoding()'>Start Decoding</button>
         <p>Progress: <span id="sessionProgress"></span></p>
         <button type="button" onclick='getStatistics()'>Get Statistics</button>
         <div id="statistics">
@@ -53,9 +53,19 @@
         return new Promise(resolve => setTimeout(resolve, ms));
     }
     
-    function startSession(){
+    function handleDecoding(){
         var session_id = document.getElementById("sessionId").innerText;
-        var url = "session/"+session_id+"/start/"+get_engine();
+        var decodingButton = document.getElementById("decodingButton");
+        
+        var action = "start";
+        if (decodingButton.innerText == "Start Decoding"){
+            decodingButton.innerText = "Stop Decoding";
+        }else{
+            decodingButton.innerText = "Start Decoding";
+            action = "stop";
+        }
+        
+        var url = "session/"+session_id+"/"+action+"/"+get_engine();
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url);
 
@@ -71,6 +81,12 @@
     
     function checkProgress(){
         var session_id = document.getElementById("sessionId").innerText;
+        
+        var decodingButton = document.getElementById("decodingButton");
+        if (decodingButton.innerText == "Start Decoding"){
+            return
+        }
+        
         var url = "session/"+session_id+"/progress";
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url);
@@ -87,6 +103,7 @@
                     checkProgress();
                 }else{
                     document.getElementById("sessionProgress").innerText = "Done!";
+                    decodingButton.innerText = "Start Decoding";
                 }
                 
             }

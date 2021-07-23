@@ -13,7 +13,9 @@ class BarcodeReaderX():
             self.dbr.init_runtime_settings_with_file("template.json")
         self.context = zmq.Context()
         self.process = None
+        self.start_commandline_zmq_server_if_unstarted()
 
+    def start_commandline_zmq_server_if_unstarted(self):
         socket = self.context.socket(zmq.REQ)
         socket.connect("tcp://localhost:5556")
         socket.send(b"Hello")
@@ -27,6 +29,12 @@ class BarcodeReaderX():
             f.close()
             self.process = subprocess.Popen([commandline_path.strip()], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             
+    def stop_commandline_zmq_server_if_started(self):
+        try:
+            self.process.kill()
+        except:
+            print("process not opened")
+        
     
     def decode_file(self, img_path, engine=""):
         result_dict = {}
