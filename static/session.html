@@ -144,12 +144,15 @@
         heading_3.innerHTML = "Ground Truth";
         let heading_4 = document.createElement('th');
         heading_4.innerHTML = "Correct";
+        let heading_5 = document.createElement('th');
+        heading_5.innerHTML = "Note";
 
         row_1.appendChild(heading_0);
         row_1.appendChild(heading_1);
         row_1.appendChild(heading_2);
         row_1.appendChild(heading_3);
         row_1.appendChild(heading_4);
+        row_1.appendChild(heading_5);
         thead.appendChild(row_1);
         
         
@@ -192,11 +195,21 @@
 
             var c4 = document.createElement('td');
             c4.innerHTML = correct;
+            
+            var note = "";
+            var c5 = document.createElement('td');
+            if (imgResult["wrong_detected"]==true){
+                note = "wrong result";
+            }
+            c5.innerHTML = note;
+            
+            
             row.appendChild(c0);
             row.appendChild(c1);
             row.appendChild(c2);
             row.appendChild(c3);
             row.appendChild(c4);
+            row.appendChild(c5);
             tbody.appendChild(row);
            
         }

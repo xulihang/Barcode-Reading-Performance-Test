@@ -134,6 +134,7 @@ class Batch_session():
                         total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
                         if barcode_text.find(ground_truth) == -1:
                             wrong_detected=wrong_detected+1
+                            image_decoding_result["wrong_detected"] = True
                             failed = True
                 else:
                     undetected=undetected+1
