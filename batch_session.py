@@ -162,13 +162,14 @@ class Batch_session():
                     self.copy_undetected_to_failed_folder(filename,engine)
                 
         total = len(self.files_list)
-        correctly_detected = total - undetected - wrong_detected
+        detected = total - undetected
+        correctly_detected = detected - wrong_detected
         data["img_results"] = img_results
         data["total"] = total
         data["undetected"] = undetected
         data["wrong_detected"] = wrong_detected
         
-        data["precision"] = correctly_detected / (total - undetected)
+        data["precision"] = correctly_detected / detected
         data["accuracy"] = correctly_detected / total
         data["time_elapsed"] = total_elapsedTime
         data["average_time"] = total_elapsedTime / total
