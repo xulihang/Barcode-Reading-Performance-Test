@@ -155,8 +155,8 @@ class Batch_session():
                     failed = True
                     
                 image_decoding_result["ground_truth"] = ground_truth_list
-                print("ground truth list")
-                print(ground_truth_list)
+                #print("ground truth list")
+                #print(ground_truth_list)
                 image_decoding_result["failed"] = failed
                 if failed == True:
                     self.copy_undetected_to_failed_folder(filename,engine)

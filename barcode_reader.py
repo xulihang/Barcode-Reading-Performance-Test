@@ -46,7 +46,17 @@ class BarcodeReaderX():
                 for tr in text_results:
                     result = {}
                     result["barcodeFormat"] = tr.barcode_format_string
+                    result["barcodeFormat_2"] = tr.barcode_format_string_2
                     result["barcodeText"] = tr.barcode_text
+                    bytes_string = ""
+                    for i in range(0,len(tr.barcode_bytes)):
+                        byte = tr.barcode_bytes[i]
+                        hex_data = hex(byte).replace("0x","").upper()
+                        if len(hex_data)==1:
+                            hex_data = "0" + hex_data
+                        hex_data = "00" + hex_data
+                        bytes_string= bytes_string + hex_data
+                    result["barcodeBytes"] = bytes_string
                     result["confidence"] = tr.extended_results[0].confidence
                     results.append(result)
         elif engine == "commandline":
@@ -67,6 +77,6 @@ class BarcodeReaderX():
         
 if __name__ == '__main__':
     reader = BarcodeReaderX()
-    results = reader.decode_file("D:\\test\\BarcodePerformance\\9002759812614-01_N95-2592x1944.jpg",engine="commandline")
+    results = reader.decode_file("D:\\test\\BarcodePerformance\\test.jpg")
     print(results)
     
