@@ -74,7 +74,7 @@ class Batch_session():
     def load_files_list(self):
         for filename in os.listdir(self.img_folder):
             name, ext = os.path.splitext(filename)
-            if ext.lower() in ('.png','.jpg','.jpeg','.bmp'):
+            if ext.lower() in ('.png','.jpg','.jpeg','.bmp','.tif', '.tiff','.pdf'):
                 self.files_list.append(filename)
 
     def get_process(self):
@@ -107,7 +107,8 @@ class Batch_session():
             return filename+".json"
     
     def get_ground_truth_list(self, filename):
-        txt_path = os.path.join(self.img_folder,filename+".txt")
+        name, ext = os.path.splitext(filename)
+        txt_path = os.path.join(self.img_folder,name+".txt")
         if os.path.exists(txt_path):
             f = open(txt_path, "r")
             ground_truth_list=json.loads(f.read())
@@ -143,7 +144,8 @@ class Batch_session():
                         total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
                         
                         for ground_truth in ground_truth_list:
-                            if barcode_text.find(ground_truth) == -1:
+                            text = ground_truth["text"]
+                            if barcode_text.find(text) == -1:
                                 wrong_detected=wrong_detected+1
                                 image_decoding_result["wrong_detected"] = True
                                 failed = True
@@ -153,6 +155,8 @@ class Batch_session():
                     failed = True
                     
                 image_decoding_result["ground_truth"] = ground_truth_list
+                print("ground truth list")
+                print(ground_truth_list)
                 image_decoding_result["failed"] = failed
                 if failed == True:
                     self.copy_undetected_to_failed_folder(filename,engine)

@@ -167,11 +167,12 @@
         for (let key in imgResults) {
             index = index+1;
             var imgResult = imgResults[key];
-            var groundTruth = imgResult["ground_truth"];
+            var groundTruthList = imgResult["ground_truth"];
             var results = imgResult["results"];
             var barcodeText = "";
             var barcodeFormat = "";
             var confidence = "";
+            var groundTruth_Text = "";
             for (var j=0;j<results.length;j++){
                 var result = results[j];
                 if (j>0){
@@ -184,6 +185,13 @@
                 confidence = confidence + result["confidence"] + "";
             }
 
+            for (var j=0;j<groundTruthList.length;j++){
+                var groundTruth = groundTruthList[j];
+                if (j>0){
+                    groundTruth_Text = groundTruth_Text + ", "
+                }
+                groundTruth_Text = groundTruth_Text + groundTruth["text"];
+            }
             var row = document.createElement('tr');
             
             var data = [];
@@ -196,7 +204,7 @@
             data.push(a.outerHTML)
             
             data.push(barcodeText);
-            data.push(groundTruth);
+            data.push(groundTruth_Text);
             data.push(barcodeFormat);
             data.push(imgResult["elapsedTime"]);
             if (confidence.indexOf("undefined")!=-1){

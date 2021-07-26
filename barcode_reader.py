@@ -7,7 +7,7 @@ import zmq
 class BarcodeReaderX():
     def __init__(self):
         self.dbr = BarcodeReader()
-        self.dbr.init_license("t0069fQAAADni8mnJeS0cnoLp85KEXFCh78ltXDT3x52OWWW0qsnvVBOkG7nz+do12XxdqoHCJQ+U+Bbg+RPP/7nyQsQkDtOC")
+        self.dbr.init_license("t0070fQAAAG16DXrR4sc8gNexDekiNrG6xJSiDAabkbAKOyeFtNASIwCzV+Nc6x1GXNVxyJPapcWE++aFwJYBKTFxNqbunQgbAA==")
         if os.path.exists("template.json"):
             print("Found template")
             self.dbr.init_runtime_settings_with_file("template.json")

@@ -5,7 +5,12 @@
     <title>Performance Test</title> 
 </head>
 <body>
-    Image Folder Path: <input type="text" id="folderpath" name="folderpath" value="D:\test\BarcodePerformance\dataset"><br>
+    Image folder path: <input type="text" id="folderpath" name="folderpath" value="D:\test\BarcodePerformance\dataset">
+    Existing dataset: 
+    <select onchange="updateFolderPath(this.value)">
+        <option value ="D:\test\BarcodePerformance\dataset">N95</option>
+        <option value ="D:\dataset\ABBYY">ABBYY</option>
+    </select><br/>
     <button type="button" onclick='createSession()'>Create Session</button>
     <p>A new window will open.</p>
     
@@ -55,7 +60,6 @@
                 var sessionsContainer = document.getElementById("sessions");
                 var ul = document.createElement("ul");
                 for (let key in sessions) {
-                
                     var a = document.createElement("a");
                     a.href = "/session.html?id="+key;
                     a.target = "_blank";
@@ -68,6 +72,10 @@
             }
         }
         xhr.send();
+    }
+    
+    function updateFolderPath(value){
+        document.getElementById("folderpath").value=value;
     }
 </script>
 
