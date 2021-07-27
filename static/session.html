@@ -32,11 +32,13 @@
         <p>Progress: <span id="sessionProgress"></span></p>
         <button type="button" onclick='getStatistics()'>Get Statistics</button><br/>
         <button type="button" onclick='getDataAndDrawChart()'>Draw Comparison Chart</button><br/>
+        <div id="charts" style="display:none;">
+            <div id="accuracy" style="width: 600px;height:400px;"></div>
+            <div id="precision" style="width: 600px;height:400px;"></div>
+            <div id="timeelapsed" style="width: 600px;height:400px;"></div>
+            <div id="averagetime" style="width: 600px;height:400px;"></div>
+        </div>
         <a href="#" onclick="download_table_as_csv();" id="csv" style="display:none;">Download as CSV</a>
-        <div id="accuracy" style="width: 600px;height:400px;"></div>
-        <div id="precision" style="width: 600px;height:400px;"></div>
-        <div id="timeelapsed" style="width: 600px;height:400px;"></div>
-        <div id="averagetime" style="width: 600px;height:400px;"></div>
         <div id="statistics">
         
         </div>
@@ -62,7 +64,9 @@
     }
     
     function drawChart(data){
-    // based on prepared DOM, initialize echarts instance
+        // based on prepared DOM, initialize echarts instance
+        var chartsContainer = document.getElementById("charts");
+        chartsContainer.style.display = "block";
         
         var engines = [];
         var categories = ["accuracy","precision","time_elapsed","average_time"];
