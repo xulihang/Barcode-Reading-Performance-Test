@@ -14,7 +14,6 @@ class ZbarBarcodeReader():
         
         if text_results!=None:
             for tr in text_results:
-                print(tr)
                 result = {}
                 result["barcodeFormat"] = tr.type
                 result["barcodeText"] = tr.data.decode("utf-8")
