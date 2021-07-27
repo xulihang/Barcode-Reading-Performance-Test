@@ -15,6 +15,8 @@
           color: red;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.1.2/dist/echarts.min.js"></script>
+    
 </head>
 <body>
     <div id="session">
@@ -29,7 +31,12 @@
         <button type="button" id="decodingButton" onclick='handleDecoding()'>Start Decoding</button>
         <p>Progress: <span id="sessionProgress"></span></p>
         <button type="button" onclick='getStatistics()'>Get Statistics</button><br/>
+        <button type="button" onclick='getDataAndDrawChart()'>Draw Comparison Chart</button><br/>
         <a href="#" onclick="download_table_as_csv();" id="csv" style="display:none;">Download as CSV</a>
+        <div id="accuracy" style="width: 600px;height:400px;"></div>
+        <div id="precision" style="width: 600px;height:400px;"></div>
+        <div id="timeelapsed" style="width: 600px;height:400px;"></div>
+        <div id="averagetime" style="width: 600px;height:400px;"></div>
         <div id="statistics">
         
         </div>
@@ -37,6 +44,135 @@
     </div>
 <script>
     get_session_id();
+    
+    function getDataAndDrawChart(){
+        var session_id = document.getElementById("sessionId").innerText;
+        var url = "session/"+session_id+"/comparison/"
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.onreadystatechange = async function(){
+            if(xhr.readyState === 4){
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                var data = JSON.parse(xhr.responseText);
+                drawChart(data);
+            }
+        }
+        xhr.send();    
+    }
+    
+    function drawChart(data){
+    // based on prepared DOM, initialize echarts instance
+        
+        var engines = [];
+        var categories = ["accuracy","precision","time_elapsed","average_time"];
+        var engine_data = {};
+        for (var key in data) {
+            engines.push(key);
+            var one_engine = data[key];
+            one_engine["accuracy"] = (100*one_engine["accuracy"]).toFixed(2);
+            one_engine["precision"] = (100*one_engine["precision"]).toFixed(2);
+            one_engine["time_elapsed"] = one_engine["time_elapsed"].toFixed(2);
+            one_engine["average_time"] = one_engine["average_time"].toFixed(2);
+            engine_data[key] = one_engine;
+        }
+        var labelOption = {
+            show: true,
+            formatter: '{c}  {name|{a}}',
+            fontSize: 16,
+            rich: {
+                name: {
+                }
+            }
+        };
+        console.log(engine_data["dynamsoft"]);
+        for (var i=0;i<categories.length;i++){
+            var category = categories[i];
+            var chartId = category.replace("_","");
+            console.log(chartId);
+            var myChart = echarts.init(document.getElementById(chartId));
+            console.log("load data");
+            option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    data: engines
+                },
+                toolbox: {
+                    show: true,
+                    orient: 'vertical',
+                    left: 'right',
+                    top: 'center',
+                    feature: {
+                        mark: {show: true},
+                        dataView: {show: true, readOnly: false},
+                        magicType: {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+                        restore: {show: true},
+                        saveAsImage: {show: true}
+                    }
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisTick: {show: false},
+                        data: [category]
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name: 'DBR',
+                        type: 'bar',
+                        barGap: 0,
+                        label: labelOption,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: [engine_data["dynamsoft"][category]]
+                    },
+                    {
+                        name: 'Scandit',
+                        type: 'bar',
+                        label: labelOption,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: [engine_data["commandline"][category]]
+                    },
+                    {
+                        name: 'Zxing',
+                        type: 'bar',
+                        label: labelOption,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: [engine_data["zxing"][category]]
+                    },
+                    {
+                        name: 'Zbar',
+                        type: 'bar',
+                        label: labelOption,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: [engine_data["zbar"][category]]
+                    }
+                ]
+            };
+            // use configuration item and data specified to show chart
+            myChart.setOption(option);
+        }
+
+
+    }
     
     function get_engine(){
         var engine =  document.getElementById("engine").value;

@@ -86,6 +86,14 @@ def process_engine(engine):
         return "dynamsoft"
     else:
         return engine
+
+@app.route('/session/<session_id>/comparison/')
+def get_session_comparison(session_id):
+    session = get_session(session_id)
+    if session == None:
+        return "Not exist"
+    return session.get_comparison()
+    
         
 @app.route('/session/list/')
 def get_session_list():

@@ -27,7 +27,9 @@ class Batch_session():
         self.files_list = []
         self.processed = 0
         self.load_files_list()
-        self.reading = True;
+        self.reading = True
+        self.engines = ["dynamsoft","commandline","zxing","zbar"]
+        
         
     def init_reader(self, engine="dynamsoft"):
         if self.engine == engine:
@@ -139,7 +141,7 @@ class Batch_session():
             return ground_truth_list
         return []
     
-    def get_statistics(self, engine="dynamsoft"):
+    def get_statistics(self, engine="dynamsoft", copy_failed=True):
         data = {}
         img_results = {}
         total_elapsedTime = 0
@@ -181,7 +183,7 @@ class Batch_session():
                 #print("ground truth list")
                 #print(ground_truth_list)
                 image_decoding_result["failed"] = failed
-                if failed == True:
+                if failed == True and copy_failed == True:
                     self.copy_undetected_to_failed_folder(filename, engine)
                 
         total = len(self.files_list)
@@ -210,6 +212,19 @@ class Batch_session():
             os.mkdir(failed_folder_path)
         target = os.path.join(failed_folder_path,filename)
         copyfile(img_path,target)
+        
+    def get_comparison(self):
+        result = {}
+        for engine in self.engines:
+            data = self.get_statistics(engine=engine,copy_failed=False)
+            engine_result = {}
+            engine_result["precision"] = data["precision"]
+            engine_result["accuracy"] = data["accuracy"]
+            engine_result["time_elapsed"] = data["time_elapsed"]
+            engine_result["average_time"] = data["average_time"]
+            result[engine] = engine_result
+        return result
+        
         
         
 if __name__ == '__main__':
