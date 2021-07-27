@@ -39,6 +39,12 @@ class Batch_session():
         elif self.engine == "commandline":
             from barcode_reader.commandline import CommandLineBarcodeReader
             self.reader = CommandLineBarcodeReader()
+        elif self.engine == "zxing":
+            from barcode_reader.zxing import ZXingBarcodeReader
+            self.reader = ZXingBarcodeReader()
+        elif self.engine == "zbar":
+            from barcode_reader.zbar import ZbarBarcodeReader
+            self.reader = ZbarBarcodeReader()    
             
     
     def decode_and_save_results(self):
@@ -66,6 +72,7 @@ class Batch_session():
             json_dict = {}
             json_dict["elapsedTime"] = elapsedTime
             json_dict["results"] = results
+
             json_string = json.dumps(json_dict, indent="\t")
             
             f = open(os.path.join(self.json_folder,self.get_json_filename(filename)),"w")
