@@ -82,8 +82,8 @@ def get_session_statistics(session_id, engine):
     
 def process_engine(engine):
     print(engine)
-    if engine == "dynamsoft":
-        return ""
+    if engine == "":
+        return "dynamsoft"
     else:
         return engine
         

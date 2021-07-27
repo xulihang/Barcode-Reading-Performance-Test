@@ -5,7 +5,6 @@ import time
 import threading
 import uuid
 from shutil import copyfile
-from barcode_reader import BarcodeReaderX
 
 class Batch_session():
     def __init__(self, img_folder, output_folder, template=None,session_id=None):
@@ -23,14 +22,26 @@ class Batch_session():
         f.write(img_folder)
         f.close()
         
-        self.reader = BarcodeReaderX()
-        
+        self.reader = None
+        self.engine = ""
         self.files_list = []
         self.processed = 0
         self.load_files_list()
         self.reading = True;
+        
+    def init_reader(self, engine="dynamsoft"):
+        if self.engine == engine:
+            return
+        self.engine = engine;
+        if self.engine == "dynamsoft" or self.engine == "":
+            from barcode_reader.dynamsoft import DynamsoftBarcodeReader
+            self.reader = DynamsoftBarcodeReader()
+        elif self.engine == "commandline":
+            from barcode_reader.commandline import CommandLineBarcodeReader
+            self.reader = CommandLineBarcodeReader()
+            
     
-    def decode_and_save_results(self, engine=""):
+    def decode_and_save_results(self):
         self.processed = 0
         for filename in self.files_list:
             print("Decoding "+filename)
@@ -41,9 +52,9 @@ class Batch_session():
             result_dict = {}
             results = []
             try:
-                result_dict = self.reader.decode_file(os.path.join(self.img_folder,filename),engine=engine)
-            except:
-                print("Error")
+                result_dict = self.reader.decode_file(os.path.join(self.img_folder,filename))
+            except Exception as e:
+                print(e)
             end_time = time.time()
             elapsedTime = int((end_time - start_time) * 1000)
             
@@ -57,18 +68,21 @@ class Batch_session():
             json_dict["results"] = results
             json_string = json.dumps(json_dict, indent="\t")
             
-            f = open(os.path.join(self.json_folder,self.get_json_filename(filename, engine)),"w")
+            f = open(os.path.join(self.json_folder,self.get_json_filename(filename)),"w")
             f.write(json_string)
             f.close()
             self.processed=self.processed+1
             
-    def start_reading(self, engine=""):
+    def start_reading(self, engine="dynamsoft"):
+        self.init_reader(engine)
         self.reading = True
-        self.reader.start_commandline_zmq_server_if_unstarted()
-        threading.Thread(target=self.decode_and_save_results, args=(engine,)).start()
+        if self.engine == "commandline":
+            self.reader.start_commandline_zmq_server_if_unstarted()
+        threading.Thread(target=self.decode_and_save_results, args=()).start()
         
     def stop_reading(self):
-        self.reader.stop_commandline_zmq_server_if_started()
+        if self.engine == "commandline":
+            self.reader.stop_commandline_zmq_server_if_started()
         self.reading = False
             
     def load_files_list(self):
@@ -80,17 +94,17 @@ class Batch_session():
     def get_process(self):
         return "{}/{}".format(self.processed, len(self.files_list))
         
-    def completed(self, engine=""):
+    def completed(self):
         imgs_list = {}
         json_list = {}
-
+        print(self.files_list)
         for filename in self.files_list:
             imgs_list[filename] = ""
-            json_filename = self.get_json_filename(filename, engine)
+            json_filename = self.get_json_filename(filename)
             if os.path.exists(os.path.join(self.json_folder,json_filename)):
                 json_list[json_filename] = ""
         for img_filename in imgs_list:
-            if self.get_json_filename(img_filename,engine) not in json_list:
+            if self.get_json_filename(img_filename) not in json_list:
                 return False
         return True
         
@@ -101,7 +115,9 @@ class Batch_session():
     With engine: 1.jpg-engine.json
     '''
     def get_json_filename(self, filename, engine=""):
-        if engine!="":
+        if engine=="":
+            engine=self.engine
+        if engine!="dynamsoft":
             return filename+"-"+engine+".json"
         else:
             return filename+".json"
@@ -116,7 +132,7 @@ class Batch_session():
             return ground_truth_list
         return []
     
-    def get_statistics(self, engine=""):
+    def get_statistics(self, engine="dynamsoft"):
         data = {}
         img_results = {}
         total_elapsedTime = 0
@@ -159,7 +175,7 @@ class Batch_session():
                 #print(ground_truth_list)
                 image_decoding_result["failed"] = failed
                 if failed == True:
-                    self.copy_undetected_to_failed_folder(filename,engine)
+                    self.copy_undetected_to_failed_folder(filename, engine)
                 
         total = len(self.files_list)
         detected = total - undetected
@@ -168,16 +184,18 @@ class Batch_session():
         data["total"] = total
         data["undetected"] = undetected
         data["wrong_detected"] = wrong_detected
-        
-        data["precision"] = correctly_detected / detected
+        if detected>0:
+            data["precision"] = correctly_detected / detected
+        else:
+            data["precision"] = ""
         data["accuracy"] = correctly_detected / total
         data["time_elapsed"] = total_elapsedTime
         data["average_time"] = total_elapsedTime / total
         return data
         
-    def copy_undetected_to_failed_folder(self, filename, engine=""):
+    def copy_undetected_to_failed_folder(self, filename, engine="dynamsoft"):
         img_path = os.path.join(self.img_folder,filename)
-        if engine == "":
+        if engine == "dynamsoft":
             failed_folder_path = os.path.join(self.json_folder,"failed")
         else:
             failed_folder_path = os.path.join(self.json_folder,"failed-" + engine)
@@ -188,7 +206,8 @@ class Batch_session():
         
         
 if __name__ == '__main__':
-    session = Batch_session("./","./tmp",session_id="c7edc4c5ea9011eb8965e84e068e29b8")
+    session = Batch_session("./tmp","./tmp",session_id="c7edc4c5ea9011eb8965e84e068e29b8")
+    session.init_reader("commandline")
     if (session.completed()):
         print("Already completed")
         print(session.get_statistics())
