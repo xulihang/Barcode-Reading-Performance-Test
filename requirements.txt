@@ -1,0 +1,6 @@
+dbr==8.6
+Flask==1.1.2
+pyzxing==1.0.1
+pyzbar==0.1.8
+Pillow==8.3.1
+pyzmq==22.1.0
