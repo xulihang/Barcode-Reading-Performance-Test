@@ -1,27 +1,27 @@
-from pyzxing import BarCodeReader
+import zxingcpp
+from PIL import Image
 import os
 
 
 class ZXingBarcodeReader():
     def __init__(self):
-        self.reader = BarCodeReader()
+        pass
 
     def decode_file(self, img_path):
         result_dict = {}
         results = []
-        text_results = self.reader.decode(img_path)
+        tr = zxingcpp.read_barcode(Image.open(img_path))
         
-        if text_results!=None:
-            for tr in text_results:
-                result = {}
-                result["barcodeFormat"] = tr["format"].decode("utf-8")
-                result["barcodeText"] = tr["parsed"].decode("utf-8")
-                results.append(result)
+        if tr.valid == True:
+            result = {}
+            result["barcodeFormat"] = tr.format.name
+            result["barcodeText"] = tr.text
+            results.append(result)
         result_dict["results"] = results
         return result_dict
         
 if __name__ == '__main__':
     reader = ZXingBarcodeReader()
-    results = reader.decode_file("D:\\test\\BarcodePerformance\\test.jpg")
+    results = reader.decode_file("2003892380005-01_N95-2592x1944.jpg")
     print(results)
     
