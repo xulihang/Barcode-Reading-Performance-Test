@@ -1,6 +1,6 @@
-pyzbar==0.1.8
 Flask==1.1.2
 zxing_cpp==1.2.0
+pyzbar==0.1.8
 dbr==8.6
 Pillow==8.3.1
 pyzmq==22.1.0
