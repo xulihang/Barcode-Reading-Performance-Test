@@ -28,10 +28,12 @@ def create_session():
         data=request.get_json()
         if "folderpath" in data:
             img_folder = data["folderpath"]
-            print(img_folder)
+            session_name = ""
+            if "name" in data:
+                session_name = data["name"]
             if os.path.exists(tmp_path) == False:
                 os.mkdir(tmp_path)
-            session = Batch_session(img_folder,tmp_path)
+            session = Batch_session(img_folder,tmp_path,name=session_name)
             session_id = session.id
             sessions[session_id]=session
             return {"status":"success","session_id":session_id}
@@ -108,11 +110,17 @@ def get_session_list():
     for filename in os.listdir(tmp_path):
         session_dir = os.path.join(tmp_path,filename)
         img_folder_conf = os.path.join(session_dir,"img_folder")
+        name_conf = os.path.join(session_dir,"name")
         if os.path.exists(img_folder_conf):
             f = open(img_folder_conf,"r")
             folder_path = f.read()
             f.close()
             sessions_dict[filename] = folder_path
+            if os.path.exists(name_conf):
+                f = open(name_conf,"r")
+                sessions_dict[filename] = sessions_dict[filename] +":"+f.read();
+                f.close()
+            
     return sessions_dict
 
 if __name__ == '__main__':

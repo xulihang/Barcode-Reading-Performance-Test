@@ -7,8 +7,9 @@ import uuid
 from shutil import copyfile
 
 class Batch_session():
-    def __init__(self, img_folder, output_folder, template=None,session_id=None):
+    def __init__(self, img_folder, output_folder, template=None,session_id=None, name=""):
         self.img_folder = img_folder
+        self.name = name
         self.output_folder = output_folder
         self.id = uuid.uuid1().hex
         
@@ -20,6 +21,10 @@ class Batch_session():
             
         f = open(os.path.join(self.json_folder,"img_folder"),"w")
         f.write(img_folder)
+        f.close()
+        
+        f = open(os.path.join(self.json_folder,"name"),"w")
+        f.write(name)
         f.close()
         
         self.reader = None

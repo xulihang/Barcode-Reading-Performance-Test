@@ -11,6 +11,7 @@
         <option value ="D:\test\BarcodePerformance\dataset">N95</option>
         <option value ="D:\test\BarcodePerformance\abbyy">ABBYY</option>
     </select><br/>
+    Name: <input type="text" id="name" name="name" value="Test">
     <button type="button" onclick='createSession()'>Create Session</button>
     <p>A new window will open.</p>
     
@@ -29,6 +30,7 @@
         var xhr = new XMLHttpRequest();
         var pay_load = {};
         pay_load["folderpath"] = document.getElementById("folderpath").value;
+        pay_load["name"] = document.getElementById("name").value;
 
         xhr.open('POST', url);
         xhr.setRequestHeader('content-type', 'application/json'); 
