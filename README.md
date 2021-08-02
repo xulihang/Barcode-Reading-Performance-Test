@@ -42,17 +42,18 @@ This is how Scandit is integrated. You can see the example here: <https://github
    An example of the ground truth file:
    
    ```js
-   [{"attrib": {"Type": "EAN13"}, "text": "9785699128013", "value_attrib": {}}]```
+   [{"attrib": {"Type": "EAN13"}, "text": "9785699128013", "value_attrib": {}}]
+   ```
    
    Every session has a unique ID. We can check them out later with its ID. Previous sessions will be listed on the homepage.
    
-   ![](/imgs/homepage.jpg)
+   ![](https://raw.githubusercontent.com/xulihang/Barcode-Reading-Performance-Test/main/imgs/homepage.jpg)
    
    You can also assign a name to a session.
 
 3. You will be directed to a session page where you can start decoding with a specified SDK and see the results.
 
-    ![](/imgs/sessionpage.jpg)
+    ![](https://raw.githubusercontent.com/xulihang/Barcode-Reading-Performance-Test/main/imgs/sessionpage.jpg)
     
     There are several metrics: accuracy, precision, elapsed time, average time, etc.
     
@@ -65,7 +66,7 @@ This is how Scandit is integrated. You can see the example here: <https://github
 
    You can list images detected/undetected by some SDK and filter the results. It can also draw a comparison chart.
    
-   ![](/imgs/comparisonpage.jpg)
+   ![](https://raw.githubusercontent.com/xulihang/Barcode-Reading-Performance-Test/main/imgs/comparisonpage.jpg)
    
    
 ## Barcode Datasets
