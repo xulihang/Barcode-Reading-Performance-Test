@@ -134,7 +134,7 @@
                 console.log(xhr.responseText);
                 var data = JSON.parse(xhr.responseText);
                 var overview = document.createElement("pre");
-                var content = "Presion:"+ data["precision"];
+                var content = "Precision:"+ data["precision"];
                 content = content + "\n" + "Accuracy: " + data["accuracy"];
                 content = content + "\nTotal: " + data["total"];
                 content = content + "\nUndetected: " + data["undetected"];
