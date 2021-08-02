@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <meta charset="utf-8"> 
+    <title>Performance Test</title> 
+    <style type="text/css">
+        table, th, td {
+          border: 1px solid black;
+          text-align: center;
+          max-width: 200px;
+          overflow: auto;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.1.2/dist/echarts.min.js"></script>
+    
+</head>
+<body>
+    <div id="session">
+        <p>Session: <span id="sessionId"></span></p>
+        <button type="button" onclick='getComparisonStatistics()'>Get Comparison Statistics</button><br/>
+        <button type="button" onclick='getDataAndDrawChart()'>Draw Comparison Chart</button><br/>
+        <div id="charts" style="display:none;">
+            <div id="accuracy" style="width: 600px;height:400px;"></div>
+            <div id="precision" style="width: 600px;height:400px;"></div>
+            <div id="timeelapsed" style="width: 600px;height:400px;"></div>
+            <div id="averagetime" style="width: 600px;height:400px;"></div>
+        </div>
+
+        <div id="statistics">
+            <a href="#" onclick="download_table_as_csv();" id="csv" style="display:none;">Download as CSV</a>
+            <div id="comparisonTable"></div>
+        </div>
+    </div>
+<script>
+    get_session_id();
+    
+    function getDataAndDrawChart(){
+        var session_id = document.getElementById("sessionId").innerText;
+        var url = "session/"+session_id+"/comparison/"
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.onreadystatechange = async function(){
+            if(xhr.readyState === 4){
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                var data = JSON.parse(xhr.responseText);
+                drawChart(data);
+            }
+        }
+        xhr.send();    
+    }
+    
+    function drawChart(data){
+        // based on prepared DOM, initialize echarts instance
+        var chartsContainer = document.getElementById("charts");
+        chartsContainer.style.display = "block";
+        
+        var engines = [];
+        var categories = ["accuracy","precision","time_elapsed","average_time"];
+        var engine_data = {};
+        for (var key in data) {
+            engines.push(key);
+            var one_engine = data[key];
+            one_engine["accuracy"] = (100*one_engine["accuracy"]).toFixed(2);
+            one_engine["precision"] = (100*one_engine["precision"]).toFixed(2);
+            one_engine["time_elapsed"] = one_engine["time_elapsed"].toFixed(2);
+            one_engine["average_time"] = one_engine["average_time"].toFixed(2);
+            engine_data[key] = one_engine;
+        }
+        var labelOption = {
+            show: true,
+            formatter: '{c}  {name|{a}}',
+            fontSize: 16,
+            rich: {
+                name: {
+                }
+            }
+        };
+        console.log(engine_data["dynamsoft"]);
+        for (var i=0;i<categories.length;i++){
+            var category = categories[i];
+            var chartId = category.replace("_","");
+            console.log(chartId);
+            var myChart = echarts.init(document.getElementById(chartId));
+            console.log("load data");
+            option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    data: engines
+                },
+                toolbox: {
+                    show: true,
+                    orient: 'vertical',
+                    left: 'right',
+                    top: 'center',
+                    feature: {
+                        mark: {show: true},
+                        dataView: {show: true, readOnly: false},
+                        magicType: {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+                        restore: {show: true},
+                        saveAsImage: {show: true}
+                    }
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisTick: {show: false},
+                        data: [category]
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name: 'DBR',
+                        type: 'bar',
+                        barGap: 0,
+                        label: labelOption,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: [engine_data["dynamsoft"][category]]
+                    },
+                    {
+                        name: 'Scandit',
+                        type: 'bar',
+                        label: labelOption,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: [engine_data["commandline"][category]]
+                    },
+                    {
+                        name: 'Zxing',
+                        type: 'bar',
+                        label: labelOption,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: [engine_data["zxing"][category]]
+                    },
+                    {
+                        name: 'Zbar',
+                        type: 'bar',
+                        label: labelOption,
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: [engine_data["zbar"][category]]
+                    }
+                ]
+            };
+            // use configuration item and data specified to show chart
+            myChart.setOption(option);
+        }
+
+
+    }
+    
+    function get_session_id(){
+        sessionId = getUrlParam("id");
+        document.getElementById("sessionId").innerText = sessionId;
+        return sessionId;
+    }
+        
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]); return null;
+    }
+    
+    function getComparisonStatistics(){
+        var session_id = document.getElementById("sessionId").innerText;
+        var url = "session/"+session_id+"/complete-comparison/"
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.onreadystatechange = async function(){
+            if(xhr.readyState === 4){
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                var data = JSON.parse(xhr.responseText);
+                var comparisonTable = document.getElementById("comparisonTable");
+                comparisonTable.innerHTML = "";
+                comparisonTable.append(createComparisonTable(data));
+                var csv_button = document.getElementById("csv");
+                csv_button.style.display = "inline";
+            }
+        }
+        xhr.send();    
+    }
+    
+    function createComparisonTable(comparisonData){
+        var session_id = document.getElementById("sessionId").innerText;
+        var table = document.createElement('table');
+        var thead = document.createElement('thead');
+        var tbody = document.createElement('tbody');
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        
+        var headers = ["No.","Filename","Detected", "Undetected"];
+        let row_1 = document.createElement('tr');
+        for (var i =0;i<headers.length;i++){
+            let heading = document.createElement('th');
+            heading.innerHTML = headers[i];
+            row_1.appendChild(heading);
+        }
+        thead.appendChild(row_1);
+        
+        var mergedDetails = comparisonData["mergedDetails"];
+        var index = 0;
+        for (var filename in mergedDetails) {
+            index = index+1;
+            var details = mergedDetails[filename];
+            var row = document.createElement('tr');
+            var data = [];
+            data.push(index);
+            var a = document.createElement("a");
+            a.href = "/session/"+ session_id +"/image/" + filename;
+            a.target = "_blank";
+            a.innerText = filename;
+            data.push(a.outerHTML)
+            
+            var detected = details["detected"];
+            var undetected = details["undetected"];
+            var detected_engines = detected.join();
+            var undetected_engines = undetected.join();
+            data.push(detected_engines)
+            data.push(undetected_engines)
+            
+            for (var i=0;i<data.length;i++) {
+                var c = document.createElement('td');
+                c.innerHTML = data[i];
+                row.appendChild(c);
+            }
+            
+            tbody.appendChild(row);
+        }
+
+
+       return table;
+    }
+    
+    function download_table_as_csv(separator = ',') {
+        // Select rows from table_id
+        var rows = document.getElementsByTagName('tr');
+        // Construct csv
+        var csv = [];
+        for (var i = 0; i < rows.length; i++) {
+            var row = [], cols = rows[i].querySelectorAll('td, th');
+            for (var j = 0; j < cols.length; j++) {
+                // Clean innertext to remove multiple spaces and jumpline (break csv)
+                var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
+                // Escape double-quote with double-double-quote (see https://stackoverflow.com/questions/17808511/properly-escape-a-double-quote-in-csv)
+                data = data.replace(/"/g, '""');
+                // Push escaped string
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(separator));
+        }
+        var csv_string = csv.join('\n');
+        // Download it
+        
+        
+        var filename = document.getElementById("sessionId").innerText + "-" + get_engine()+ '.csv';
+        var link = document.createElement('a');
+        link.style.display = 'none';
+        link.setAttribute('target', '_blank');
+        link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv_string));
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+
+</body>
+</html>
