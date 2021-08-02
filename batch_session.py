@@ -18,14 +18,16 @@ class Batch_session():
         self.json_folder = os.path.join(self.output_folder,self.id)
         if os.path.exists(self.json_folder) == False:
             os.mkdir(self.json_folder)
-            
-        f = open(os.path.join(self.json_folder,"img_folder"),"w")
-        f.write(img_folder)
-        f.close()
         
-        f = open(os.path.join(self.json_folder,"name"),"w")
-        f.write(name)
-        f.close()
+        if os.path.exists(os.path.join(self.json_folder,"img_folder")) == False:        
+            f = open(os.path.join(self.json_folder,"img_folder"),"w")
+            f.write(img_folder)
+            f.close()
+        
+        if os.path.exists(os.path.join(self.json_folder,"name")) == False:
+            f = open(os.path.join(self.json_folder,"name"),"w")
+            f.write(name)
+            f.close()
         
         self.reader = None
         self.engine = ""
