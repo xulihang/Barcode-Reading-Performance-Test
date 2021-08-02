@@ -27,7 +27,9 @@
         </div>
 
         <div id="statistics">
-            <a href="#" onclick="download_table_as_csv();" id="csv" style="display:none;">Download as CSV</a>
+            <a href="#" onclick="download_table_as_csv();" id=
+            "csv" style="display:none;">Download as CSV</a>
+            <div id="filter"></div>
             <div id="comparisonTable"></div>
         </div>
     </div>
@@ -194,7 +196,7 @@
                 csv_button.style.display = "inline";
             }
         }
-        xhr.send();    
+        xhr.send();
     }
     
     function createComparisonTable(comparisonData){
@@ -214,7 +216,12 @@
             row_1.appendChild(heading);
         }
         thead.appendChild(row_1);
-        
+        var engines = [];
+        for (var key in comparisonData) {
+            if (key!="mergedDetails") {
+                engines.push(key);
+            }
+        }
         var mergedDetails = comparisonData["mergedDetails"];
         var index = 0;
         for (var filename in mergedDetails) {
@@ -244,7 +251,7 @@
             
             tbody.appendChild(row);
         }
-
+        appendFilter(engines);
 
        return table;
     }
@@ -279,6 +286,92 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+    
+    function appendFilter(engines){
+        var filterContainer = document.getElementById("filter");
+        filterContainer.innerHTML = "";
+        var categories = ["Detected","Undetected"];
+        for (var i = 0; i < categories.length; i++) {
+            var category = categories[i];
+            var container = document.createElement("div");
+            container.id = category;
+            container.append(category + ": ")
+            for (var j = 0; j < engines.length; j++) {
+                var engine = engines[j];
+                var lbl = document.createElement("label");
+                var chk = document.createElement("input");
+                chk.type = "checkbox";
+                chk.value = engine;
+                lbl.append(chk);
+                lbl.append(engine);
+                container.append(lbl);
+            }
+            filterContainer.append(container);
+        }
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.innerText = "Filter";
+        btn.onclick = filterResults;
+        filterContainer.append(btn);
+    }
+    
+    function filterResults(){
+        var categories = ["Detected","Undetected"];
+        var detected_conditions = {};
+        var undetected_conditions = {};
+        for (var i = 0; i < categories.length; i++) {
+            var category = categories[i];
+            var container = document.getElementById(category);
+            var chks = container.getElementsByTagName("input");
+            for (var j = 0; j < chks.length; j++) {
+                var chk = chks[j];
+                if (i==0){
+                    detected_conditions[chk.value] = chk.checked;
+                } else
+                {
+                    undetected_conditions[chk.value] = chk.checked;
+                }
+            }
+        }
+        var rows = document.getElementsByTagName("tr");
+        var rowsToHide = [];
+        for (var i = 1; i < rows.length; i++) {
+            var row = rows[i];
+            row.style.display = "";
+            var detected_engines = row.cells[2].textContent.split(",");
+            var undetected_engines = row.cells[3].textContent.split(",");
+            
+            var shouldHide = false;
+            
+            for (let engine in detected_conditions) {
+                if (detected_conditions[engine] == true) {
+                    if (detected_engines.indexOf(engine) == -1){
+                        rowsToHide.push(row);
+                        shouldHide = true;
+                        break
+                    }
+                }
+            }
+            
+            if (shouldHide){
+                continue
+            }
+            for (let engine in undetected_conditions) {
+                if (undetected_conditions[engine] == true) {
+                    if (undetected_engines.indexOf(engine) == -1){
+                        rowsToHide.push(row);
+                        shouldHide = true;
+                    }
+                }
+            }
+
+        }
+
+        for (var i = 0; i < rowsToHide.length; i++) {
+            var row = rowsToHide[i];
+            row.style.display = "none";
+        }
     }
 </script>
 
