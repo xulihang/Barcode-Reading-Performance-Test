@@ -213,17 +213,47 @@ class Batch_session():
         target = os.path.join(failed_folder_path,filename)
         copyfile(img_path,target)
         
-    def get_comparison(self):
+    def get_comparison(self,include_details=False):
         result = {}
+        data_dict = {}
         for engine in self.engines:
             data = self.get_statistics(engine=engine,copy_failed=False)
+            data_dict[engine] = data
             engine_result = {}
             engine_result["precision"] = data["precision"]
             engine_result["accuracy"] = data["accuracy"]
             engine_result["time_elapsed"] = data["time_elapsed"]
             engine_result["average_time"] = data["average_time"]
             result[engine] = engine_result
+        if include_details:
+            self.add_comparison_details(result, data_dict)
         return result
+        
+    def add_comparison_details(self, result, data_dict):
+        img_decoding_details = {}
+        for engine in self.engines:
+            data = data_dict[engine]
+            img_results = data["img_results"]
+            for filename in img_results:
+                image_decoding_result= img_results[filename]
+                detected_list = []
+                undetected_list = []
+                decoding_details_of_one_img = {}
+                if filename in img_decoding_details:
+                    decoding_details_of_one_img = img_decoding_details[filename]
+                if "detected" in decoding_details_of_one_img:
+                    detected_list = decoding_details_of_one_img["detected"]
+                if "undetected" in decoding_details_of_one_img:
+                    undetected_list = decoding_details_of_one_img["undetected"]
+                if image_decoding_result["failed"] == True:
+                    undetected_list.append(engine)
+                else:
+                    detected_list.append(engine)
+                decoding_details_of_one_img["detected"] = detected_list
+                decoding_details_of_one_img["undetected"] = undetected_list
+                img_decoding_details[filename] = decoding_details_of_one_img
+        result["mergedDetails"] = img_decoding_details
+    
         
         
         

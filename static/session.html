@@ -31,6 +31,7 @@
         <button type="button" id="decodingButton" onclick='handleDecoding()'>Start Decoding</button>
         <p>Progress: <span id="sessionProgress"></span></p>
         <button type="button" onclick='getStatistics()'>Get Statistics</button><br/>
+        <button type="button" onclick='getComparisonStatistics()'>Get Comparison Statistics</button><br/>
         <button type="button" onclick='getDataAndDrawChart()'>Draw Comparison Chart</button><br/>
         <div id="charts" style="display:none;">
             <div id="accuracy" style="width: 600px;height:400px;"></div>
@@ -38,9 +39,11 @@
             <div id="timeelapsed" style="width: 600px;height:400px;"></div>
             <div id="averagetime" style="width: 600px;height:400px;"></div>
         </div>
-        <a href="#" onclick="download_table_as_csv();" id="csv" style="display:none;">Download as CSV</a>
+
         <div id="statistics">
-        
+            <a href="#" onclick="download_table_as_csv();" id="csv" style="display:none;">Download as CSV</a>
+            <div id="comparisonTable"></div>
+            <div id="engineTable"></div>
         </div>
         
     </div>
@@ -281,10 +284,10 @@
                 content = content + "\nAverage time: " + data["average_time"];
                 
                 overview.innerHTML = content;
-                var statisticsContainer = document.getElementById("statistics");
-                statisticsContainer.innerHTML = "";
-                statisticsContainer.append(overview);
-                statisticsContainer.append(createTable(data));
+                var engineTable = document.getElementById("engineTable");
+                engineTable.innerHTML = "";
+                engineTable.append(overview);
+                engineTable.append(createTable(data));
                 
             }
         }
@@ -385,6 +388,76 @@
            
         }
         return table;
+    }
+    
+    function getComparisonStatistics(){
+        var session_id = document.getElementById("sessionId").innerText;
+        var url = "session/"+session_id+"/complete-comparison/"
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.onreadystatechange = async function(){
+            if(xhr.readyState === 4){
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                var data = JSON.parse(xhr.responseText);
+                var comparisonTable = document.getElementById("comparisonTable");
+                comparisonTable.innerHTML = "";
+                comparisonTable.append(createComparisonTable(data));
+            }
+        }
+        xhr.send();    
+    }
+    
+    function createComparisonTable(comparisonData){
+        var session_id = document.getElementById("sessionId").innerText;
+        var table = document.createElement('table');
+        var thead = document.createElement('thead');
+        var tbody = document.createElement('tbody');
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        
+        var headers = ["No.","Filename","Detected", "Undetected"];
+        let row_1 = document.createElement('tr');
+        for (var i =0;i<headers.length;i++){
+            let heading = document.createElement('th');
+            heading.innerHTML = headers[i];
+            row_1.appendChild(heading);
+        }
+        thead.appendChild(row_1);
+        
+        var mergedDetails = comparisonData["mergedDetails"];
+        var index = 0;
+        for (var filename in mergedDetails) {
+            index = index+1;
+            var details = mergedDetails[filename];
+            var row = document.createElement('tr');
+            var data = [];
+            data.push(index);
+            var a = document.createElement("a");
+            a.href = "/session/"+ session_id +"/image/" + filename;
+            a.target = "_blank";
+            a.innerText = filename;
+            data.push(a.outerHTML)
+            
+            var detected = details["detected"];
+            var undetected = details["undetected"];
+            var detected_engines = detected.join();
+            var undetected_engines = undetected.join();
+            data.push(detected_engines)
+            data.push(undetected_engines)
+            
+            for (var i=0;i<data.length;i++) {
+                var c = document.createElement('td');
+                c.innerHTML = data[i];
+                row.appendChild(c);
+            }
+            
+            tbody.appendChild(row);
+        }
+
+
+       return table;
     }
     
     function download_table_as_csv(separator = ',') {
