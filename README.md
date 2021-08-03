@@ -76,4 +76,8 @@ There are some existing public datasets available. Scripts to generate ground tr
 * [Muenster BarcodeDB](https://www.uni-muenster.de/PRIA/en/forschung/index.shtml)
 * [ZVZ-synth & ZVZ-real](https://github.com/abbyy/barcode_detection_benchmark)
 
+## Related
+
+[Boofcv's performance test](https://boofcv.org/index.php?title=Performance:QrCode)
+
 
