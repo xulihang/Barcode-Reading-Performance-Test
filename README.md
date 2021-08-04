@@ -78,6 +78,7 @@ There are some existing public datasets available. Scripts to generate ground tr
 
 ## Related
 
-[Boofcv's performance test](https://boofcv.org/index.php?title=Performance:QrCode)
+* [Boofcv's performance test](https://boofcv.org/index.php?title=Performance:QrCode)
+* [Wounded QR codes](https://www.datagenetics.com/blog/november12013/index.html)
 
 
