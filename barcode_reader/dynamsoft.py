@@ -36,7 +36,12 @@ class DynamsoftBarcodeReader():
         return result_dict
         
 if __name__ == '__main__':
+    import time
     reader = DynamsoftBarcodeReader()
-    results = reader.decode_file("D:\\test\\BarcodePerformance\\test.jpg")
+    start_time = time.time()
+    results = reader.decode_file("test.jpg")
+    end_time = time.time()
+    elapsedTime = int((end_time - start_time) * 1000)
     print(results)
+    print(elapsedTime)
     
