@@ -57,7 +57,9 @@ This is how Scandit is integrated. You can see the example here: <https://github
     
     There are several metrics: accuracy, precision, elapsed time, average time, etc.
     
-    You can also click the image's link to check out the image.
+    You can also click the image's link to check out the image. Detected barcodes will be marked out in green polygons.
+
+    ![](https://raw.githubusercontent.com/xulihang/Barcode-Reading-Performance-Test/main/imgs/reader.jpg)
     
     PS: If the ground truth file does not exist and the SDK detected barcodes, the detected one will be considered as correct. If the ground truth is provided, the program will examine whether the ground truth exists in the barcode decoding results.
 
