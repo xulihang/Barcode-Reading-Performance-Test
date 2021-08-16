@@ -4,9 +4,10 @@ import os
 import zmq
 
 class CommandLineBarcodeReader():
-    def __init__(self):
+    def __init__(self, config_path="commandline_path"):
         self.context = zmq.Context()
         self.process = None
+        self.config_path = config_path
         self.start_commandline_zmq_server_if_unstarted()
 
     def start_commandline_zmq_server_if_unstarted(self):
@@ -18,7 +19,7 @@ class CommandLineBarcodeReader():
             message = socket.recv(flags=zmq.NOBLOCK)
         except Exception as e:
             print(e)
-            f = open("commandline_path","r")
+            f = open(self.config_path,"r")
             commandline_path = f.read()
             f.close()
             print(commandline_path)
@@ -51,6 +52,7 @@ class CommandLineBarcodeReader():
         
 if __name__ == '__main__':
     reader = CommandLineBarcodeReader()
-    results = reader.decode_file("D:\\test\\BarcodePerformance\\test.jpg")
+    results = reader.decode_file("D:\\test\\BarcodePerformance\\new\\barcode_reader\\test.jpg")
     print(results)
+    reader.stop_commandline_zmq_server_if_started()
     

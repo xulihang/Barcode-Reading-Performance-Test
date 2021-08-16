@@ -17,12 +17,21 @@ class ZbarBarcodeReader():
                 result = {}
                 result["barcodeFormat"] = tr.type
                 result["barcodeText"] = tr.data.decode("utf-8")
+                rect = tr.rect
+                result["x1"] = rect.left
+                result["y1"] = rect.top
+                result["x2"] = rect.left + rect.width
+                result["y2"] = rect.top
+                result["x3"] = rect.left + rect.width
+                result["y3"] = rect.top + rect.height
+                result["x4"] = rect.left
+                result["y4"] = rect.top + rect.height
                 results.append(result)
         result_dict["results"] = results
         return result_dict
         
 if __name__ == '__main__':
     reader = ZbarBarcodeReader()
-    results = reader.decode_file("D:\\test\\BarcodePerformance\\test.jpg")
+    results = reader.decode_file("test.jpg")
     print(results)
     

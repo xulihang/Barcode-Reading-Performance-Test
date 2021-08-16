@@ -25,6 +25,15 @@ class DynamsoftBarcodeReader():
                 result["barcodeBytes"] = str(base64.b64encode(tr.barcode_bytes))[2:-1]
                 result["confidence"] = tr.extended_results[0].confidence
                 results.append(result)
+                points = tr.localization_result.localization_points
+                result["x1"] =points[0][0]
+                result["y1"] =points[0][1]
+                result["x2"] =points[1][0]
+                result["y2"] =points[1][1]
+                result["x3"] =points[2][0]
+                result["y3"] =points[2][1]
+                result["x4"] =points[3][0]
+                result["y4"] =points[3][1]
         result_dict["results"] = results
         return result_dict
         
