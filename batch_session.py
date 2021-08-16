@@ -176,7 +176,7 @@ class Batch_session():
                         total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
                         
                         for ground_truth in ground_truth_list:
-                            text = ground_truth["text"]
+                            text = ground_truth["text"].strip()
                             if barcode_text.find(text) == -1:
                                 wrong_detected=wrong_detected+1
                                 image_decoding_result["wrong_detected"] = True
