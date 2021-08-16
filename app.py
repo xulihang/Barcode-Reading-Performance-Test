@@ -1,11 +1,15 @@
 #coding=utf-8
 from flask import Flask, request, render_template, send_file
 from batch_session import Batch_session
+import aggregated_reader
 import os
+import base64
 
 app = Flask(__name__, static_url_path='/', static_folder='static')
 
 sessions={}
+
+reader = aggregated_reader.AggregatedReader()
 
 tmp_path="./tmp"
 
@@ -16,11 +20,18 @@ def index():
 
 @app.route('/session/<session_id>/image/<filename>')    
 def get_image(session_id, filename):
+    path = get_image_path(session_id, filename)
+    if os.path.exists(path):
+        return send_file(path)
+    else:
+        return "Not exist"
+    
+def get_image_path(session_id, filename):
     session = get_session(session_id)
     if session == None:
         return "Not exist"
     img_folder = session.img_folder
-    return send_file(os.path.join(img_folder,filename))
+    return os.path.join(img_folder,filename)
    
 @app.route('/session/create', methods=['POST'])
 def create_session():
@@ -122,6 +133,33 @@ def get_session_list():
                 f.close()
             
     return sessions_dict
+    
+@app.route('/deocde', methods=['POST'])
+def decode():
+    data = request.get_json()
+    engine = data["engine"]
+    reader.engine = engine
+    reader.init_reader()
+    if "base64" in data:
+        image_data = base64.b64decode(data["base64"])
+        path = "test.jpg"
+        file = open(path,'wb')
+        file.write(image_data)
+        file.close()
+        return reader.decode_file(os.path.abspath(path))
+    elif "session_id" in data:
+        session_id = data["session_id"]
+        filename = data["filename"]
+        return reader.decode_file(get_image_path(session_id,filename))
+    else:
+        return "No valid data"
+        
+    
+    
+    
+    
+    
+
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',port=5111)
