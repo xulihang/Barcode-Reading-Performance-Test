@@ -1,5 +1,6 @@
 from dbr import *
 import os
+import base64
 
 
 class DynamsoftBarcodeReader():
@@ -21,15 +22,7 @@ class DynamsoftBarcodeReader():
                 result["barcodeFormat"] = tr.barcode_format_string
                 result["barcodeFormat_2"] = tr.barcode_format_string_2
                 result["barcodeText"] = tr.barcode_text
-                bytes_string = ""
-                for i in range(0,len(tr.barcode_bytes)):
-                    byte = tr.barcode_bytes[i]
-                    hex_data = hex(byte).replace("0x","").upper()
-                    if len(hex_data)==1:
-                        hex_data = "0" + hex_data
-                    hex_data = "00" + hex_data
-                    bytes_string= bytes_string + hex_data
-                result["barcodeBytes"] = bytes_string
+                result["barcodeBytes"] = str(base64.b64encode(tr.barcode_bytes))[2:-1]
                 result["confidence"] = tr.extended_results[0].confidence
                 results.append(result)
         result_dict["results"] = results
