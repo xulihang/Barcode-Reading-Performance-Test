@@ -4,6 +4,7 @@ from batch_session import Batch_session
 import aggregated_reader
 import os
 import base64
+import uuid
 
 app = Flask(__name__, static_url_path='/', static_folder='static')
 
@@ -142,11 +143,13 @@ def decode():
     reader.init_reader()
     if "base64" in data:
         image_data = base64.b64decode(data["base64"])
-        path = "test.jpg"
+        path = uuid.uuid1().hex
         file = open(path,'wb')
         file.write(image_data)
         file.close()
-        return reader.decode_file(os.path.abspath(path))
+        results = reader.decode_file(os.path.abspath(path))
+        os.remove(path)
+        return results
     elif "session_id" in data:
         session_id = data["session_id"]
         filename = data["filename"]
