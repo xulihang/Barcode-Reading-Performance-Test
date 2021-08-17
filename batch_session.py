@@ -141,10 +141,22 @@ class Batch_session():
     def get_ground_truth_list(self, filename):
         name, ext = os.path.splitext(filename)
         txt_path = os.path.join(self.img_folder,name+".txt")
+        if os.path.exists(txt_path) == False:
+            txt_path = os.path.join(self.img_folder,filename+".txt")
         if os.path.exists(txt_path):
-            f = open(txt_path, "r")
-            ground_truth_list=json.loads(f.read())
-            f.close()
+            ground_truth_list = []
+            try:
+                f = open(txt_path, "r")
+                content = f.read().strip()
+                ground_truth_list=json.loads(content)
+                if isinstance(1,list) == False:
+                    ground_truth_list=[]
+                    result = {}
+                    result["text"] = content
+                    ground_truth_list.append(result)
+                f.close()
+            except Exception as e:
+                print(e)
             return ground_truth_list
         return []
     
