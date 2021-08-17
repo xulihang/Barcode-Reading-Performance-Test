@@ -148,8 +148,8 @@ class Batch_session():
             try:
                 f = open(txt_path, "r")
                 content = f.read().strip()
-                ground_truth_list=json.loads(content)
-                if isinstance(1,list) == False:
+                ground_truth_list=json.loads(content)                
+                if isinstance(ground_truth_list,list) == False:
                     ground_truth_list=[]
                     result = {}
                     result["text"] = content
