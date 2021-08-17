@@ -137,6 +137,7 @@
                 var content = "Precision:"+ data["precision"];
                 content = content + "\n" + "Accuracy: " + data["accuracy"];
                 content = content + "\nTotal: " + data["total"];
+                content = content + "\nDetected: " + (data["total"] - data["undetected"]);
                 content = content + "\nUndetected: " + data["undetected"];
                 content = content + "\nWrongly detected: " + data["wrong_detected"];
                 content = content + "\nTime elapsed: " + data["time_elapsed"];
