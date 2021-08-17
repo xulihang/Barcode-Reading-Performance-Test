@@ -136,6 +136,7 @@
                 var overview = document.createElement("pre");
                 var content = "Precision:"+ data["precision"];
                 content = content + "\n" + "Accuracy: " + data["accuracy"];
+                content = content + "\n" + "F1-score: " + data["f1score"];
                 content = content + "\nTotal: " + data["total"];
                 content = content + "\nDetected: " + (data["total"] - data["undetected"]);
                 content = content + "\nUndetected: " + data["undetected"];

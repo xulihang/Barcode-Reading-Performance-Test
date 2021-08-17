@@ -22,6 +22,7 @@
         <div id="charts" style="display:none;">
             <div id="accuracy" style="width: 600px;height:400px;"></div>
             <div id="precision" style="width: 600px;height:400px;"></div>
+            <div id="f1score" style="width: 600px;height:400px;"></div>
             <div id="timeelapsed" style="width: 600px;height:400px;"></div>
             <div id="averagetime" style="width: 600px;height:400px;"></div>
         </div>
@@ -58,7 +59,7 @@
         chartsContainer.style.display = "block";
         
         var engines = [];
-        var categories = ["accuracy","precision","time_elapsed","average_time"];
+        var categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
         var engine_data = {};
         for (var key in data) {
             engines.push(key);
@@ -67,6 +68,7 @@
             one_engine["precision"] = (100*one_engine["precision"]).toFixed(2);
             one_engine["time_elapsed"] = one_engine["time_elapsed"].toFixed(2);
             one_engine["average_time"] = one_engine["average_time"].toFixed(2);
+            one_engine["f1score"] = (100*one_engine["f1score"]).toFixed(2);
             engine_data[key] = one_engine;
         }
         var labelOption = {

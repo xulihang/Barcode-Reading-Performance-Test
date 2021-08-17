@@ -216,13 +216,16 @@ class Batch_session():
         data["total"] = total
         data["undetected"] = undetected
         data["wrong_detected"] = wrong_detected
+        precision = correctly_detected / detected
+        accuracy = correctly_detected / total
         if detected>0:
-            data["precision"] = correctly_detected / detected
+            data["precision"] = precision
         else:
             data["precision"] = ""
-        data["accuracy"] = correctly_detected / total
+        data["accuracy"] = accuracy
         data["time_elapsed"] = total_elapsedTime
         data["average_time"] = total_elapsedTime / total
+        data["f1score"] = 2 * (precision * accuracy) / (precision + accuracy)
         return data
         
     def copy_undetected_to_failed_folder(self, filename, engine="dynamsoft"):
@@ -247,6 +250,7 @@ class Batch_session():
             engine_result["accuracy"] = data["accuracy"]
             engine_result["time_elapsed"] = data["time_elapsed"]
             engine_result["average_time"] = data["average_time"]
+            engine_result["f1score"] = data["f1score"]
             result[engine] = engine_result
         if include_details:
             self.add_comparison_details(result, data_dict)
