@@ -91,7 +91,13 @@
             var sessionId = getSessionID();
             var filename = getFilename();
             if (!!sessionId){
-                appendImg("/session/"+sessionId+"/image/"+filename);
+                if (imageUnsupported(filename))
+                {
+                    appendImg("/session/"+sessionId+"/jpg/"+filename);
+                } else{
+                    appendImg("/session/"+sessionId+"/image/"+filename);
+                }
+                
             }
         }
         
@@ -213,6 +219,31 @@
             showLocalImage(name.files)
         }
         
+        function convertImageAsJPG(img){
+            if (img.src.startsWith("data")){
+                var url = "convert_base64";
+                var xhr = new XMLHttpRequest();
+                var pay_load = {};
+                var base64 = getImageData();
+                base64 = base64.substring(base64.indexOf(",")+1,base64.length) 
+                pay_load["base64"] = base64;
+                
+                xhr.open('POST', url);
+                xhr.setRequestHeader('content-type', 'application/json'); 
+
+                xhr.onreadystatechange = function(){
+                    if(xhr.readyState === 4){
+                        console.log(xhr.status);
+                        console.log(xhr.responseText);
+                        if (xhr.status==200){
+                            img.src = "data:image/jpeg;base64,"+xhr.responseText;
+                        }
+                    }
+                }
+                xhr.send(JSON.stringify(pay_load));
+            }
+        }
+        
         function showLocalImage(files){
             clearPreviousResults();
             var imgContainer =document.getElementById("imgContainer");
@@ -238,6 +269,17 @@
             img.src = data;
             img.style="width:100%;max-width:700px;"
             imgContainer.append(img);
+            if (imageUnsupported(img.src)){
+                convertImageAsJPG(img);
+            }
+        }
+        
+        function imageUnsupported(src){
+            if (src.indexOf("tif")!=-1){
+                return true;
+            }else{
+                return false;
+            }
         }
         
         function clearElements(parent,tagName){

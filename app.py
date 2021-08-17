@@ -5,6 +5,9 @@ import aggregated_reader
 import os
 import base64
 import uuid
+import cv2
+import numpy as np
+import io
 
 app = Flask(__name__, static_url_path='/', static_folder='static')
 
@@ -26,13 +29,35 @@ def get_image(session_id, filename):
         return send_file(path)
     else:
         return "Not exist"
-    
+        
+@app.route('/session/<session_id>/image_path/<filename>')   
 def get_image_path(session_id, filename):
     session = get_session(session_id)
     if session == None:
         return "Not exist"
     img_folder = session.img_folder
     return os.path.join(img_folder,filename)
+    
+@app.route('/session/<session_id>/jpg/<filename>')
+def get_image_as_jpg(session_id, filename):
+    path = get_image_path(session_id, filename)
+    if os.path.exists(path):
+        img = cv2.imread(path)
+        jpg = cv2.imencode('.jpg', img)[1]
+        #image_code = str(base64.b64encode(jpg))[2:-1]
+        return send_file(io.BytesIO(jpg), mimetype='image/jpeg')
+    else:
+        return "Not exist"
+        
+@app.route('/convert_base64', methods=['POST'])
+def convert_base64():
+    data=request.get_json()
+    imgData = base64.b64decode(data["base64"])
+    nparr = np.fromstring(imgData, np.uint8)
+    img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    image = cv2.imencode('.jpg', img_np)[1]
+    base64_data = str(base64.b64encode(image))[2:-1]
+    return base64_data
    
 @app.route('/session/create', methods=['POST'])
 def create_session():
