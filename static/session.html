@@ -233,7 +233,13 @@
             
             var note = "";
             if (imgResult["wrong_detected"]==true){
-                note = "wrong result";
+                note = "wrong or missed";
+            }
+            if (imgResult["partial_success"]==true){
+                if (note != ""){
+                    note = note + "; ";
+                }
+                note = note + "partial success";
             }
             data.push(note);
             
