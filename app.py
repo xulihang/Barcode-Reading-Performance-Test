@@ -86,7 +86,6 @@ def get_session_progress(session_id):
         return "Not exist"
     return session.get_process()    
 
-   
 @app.route('/session/<session_id>/statistics/<engine>')
 def get_session_statistics(session_id, engine):
     session = get_session(session_id)
@@ -114,7 +113,6 @@ def get_session_complete_comparison(session_id):
     if session == None:
         return "Not exist"
     return session.get_comparison(include_details=True)
-    
         
 @app.route('/session/list/')
 def get_session_list():
@@ -134,7 +132,17 @@ def get_session_list():
                 f.close()
             
     return sessions_dict
-    
+
+@app.route('/session/<session_id>/ground_truth/<filename>')
+def get_ground_truth(session_id, filename):
+    session = get_session(session_id)
+    if session == None:
+        return "Not exist"
+    ground_truth_list = session.get_ground_truth_list(filename)
+    result = {}
+    result["ground_truth"] = ground_truth_list
+    return result
+
 @app.route('/deocde', methods=['POST'])
 def decode():
     data = request.get_json()
