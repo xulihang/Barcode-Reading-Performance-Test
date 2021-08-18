@@ -183,8 +183,17 @@ class Batch_session():
                         failed = True
                     else:
                         barcode_text = ""
+                        barcodeFormat = ""
                         for result in results:
                             barcode_text = barcode_text + " " + result["barcodeText"]
+                            if barcodeFormat.upper().find("EAN"):
+                                if len(result["barcodeText"]) == 13:
+                                    barcode_text = barcode_text + " " + result["barcodeText"][1:13]
+                            if barcodeFormat.upper().find("UPC"):
+                                if len(result["barcodeText"]) == 12:
+                                    barcode_text = barcode_text + " 0" + result["barcodeText"]
+                                
+                            
                         total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
                         
                         some_detected = False
