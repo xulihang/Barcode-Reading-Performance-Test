@@ -75,6 +75,8 @@ This is how Scandit is integrated. You can see the example here: <https://github
 
 There are some existing public datasets available. Scripts to generate ground truth files are provided in the utils folder of this repo.
 
+* [QuickBrowser's 1D dataset](https://www.resl.kaist.ac.kr/doc/datasets)
+* [Artelab Medium 1D Collection](http://artelab.dista.uninsubria.it/downloads/datasets/barcode/medium_barcode_1d/medium_barcode_1d.html)
 * [Muenster BarcodeDB](https://www.uni-muenster.de/PRIA/en/forschung/index.shtml)
 * [ZVZ-synth & ZVZ-real](https://github.com/abbyy/barcode_detection_benchmark)
 
