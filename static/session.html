@@ -32,9 +32,9 @@
         <button type="button" onclick='getStatistics()'>Get Statistics</button><br/>
         <button type="button" onclick='getToComparisonPage()'>Go to Comparison Page</button><br/>
 
-        <div id="statistics">
-            <a href="#" onclick="download_table_as_csv();" id="csv" style="display:none;">Download as CSV</a>
-            <div id="charts" style="display:none;">
+        <div id="statistics" style="display:none;">
+            <a href="#" onclick="download_table_as_csv();" id="csv">Download as CSV</a>
+            <div id="charts">
                 <div id="accuracy" style="width: 300px;height:300px;display:inline-flex;"></div>
                 <div id="precision" style="width: 300px;height:300px;display:inline-flex;"></div>
             </div>            
@@ -126,6 +126,8 @@
     }
     
     function getStatistics(){
+        var statisticsContainer = document.getElementById("statistics");
+        statisticsContainer.style.display = "";
         var csv_button = document.getElementById("csv");
         csv_button.style.display = "inline";
         var session_id = document.getElementById("sessionId").innerText;
@@ -307,8 +309,6 @@
     }
     
     function drawCharts(chartId,data){
-        var chartsContainer = document.getElementById("charts");
-        chartsContainer.style.display = "block";
         var myChart = echarts.init(document.getElementById(chartId));
         myChart.setOption(
             {
