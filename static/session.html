@@ -379,8 +379,7 @@
     
     function confidenceChanged(value) {
         document.getElementById("confidence").innerText = value;
-        setTimeout("recalcuateStatistics()", 50);
-        //recalcuateStatistics();
+        recalcuateStatistics();
     }
     
     function recalcuateStatistics(){
