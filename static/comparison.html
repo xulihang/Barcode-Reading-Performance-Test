@@ -233,7 +233,7 @@
             var data = [];
             data.push(index);
             var a = document.createElement("a");
-            a.href = "/session/"+ session_id +"/image/" + filename;
+            a.href = "/reader.html?id="+ session_id +"&filename=" + filename;
             a.target = "_blank";
             a.innerText = filename;
             data.push(a.outerHTML)
