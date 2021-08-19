@@ -379,7 +379,8 @@
     
     function confidenceChanged(value) {
         document.getElementById("confidence").innerText = value;
-        recalcuateStatistics();
+        setTimeout("recalcuateStatistics()", 50);
+        //recalcuateStatistics();
     }
     
     function recalcuateStatistics(){
@@ -388,13 +389,15 @@
         var detected = 0; //include misreads
         var misread = 0;
         var total = rows.length - 1;
+        var indexToBeFiltered = [];
+        var indexToBeShown = [];
         for (var i=1;i<rows.length;i++) {
             var row = rows[i];
             var confidenceList = row.getElementsByTagName("td")[6].innerText.split(", ");
             var lowConfidence = false;
             for (var j=0;j<confidenceList.length;j++) {
                 confidence = parseInt(confidenceList[j]);
-                console.log(confidence);
+                //console.log(confidence);
                 if (confidence<confidenceThreshold) {
                     lowConfidence = true;
                 }
@@ -410,9 +413,9 @@
                         misread = misread + 1; 
                     }
                 }
-                row.style.display = "";
+                indexToBeShown.push(i);
             } else {
-                row.style.display = "none";
+                indexToBeFiltered.push(i);
             }
         }
         var accuracy = (detected - misread) / total;
@@ -420,6 +423,21 @@
         drawCharts("accuracy",accuracy*100);
         drawCharts("precision",precision*100);
         updateFilteredResults(precision, accuracy, total, detected, misread);
+        filterTableRows(indexToBeFiltered, indexToBeShown);
+    }
+    
+    function filterTableRows(indexToBeFiltered,indexToBeShown){
+        var rows = document.getElementsByTagName('tr');
+        for (var i=0;i<indexToBeFiltered.length;i++) {
+            var index = indexToBeFiltered[i];
+            var row = rows[index];
+            row.style.display = "none";
+        }
+        for (var i=0;i<indexToBeShown.length;i++) {
+            var index = indexToBeShown[i];
+            var row = rows[index];
+            row.style.display = "";
+        }
     }
     
     function updateFilteredResults(precision, accuracy, total, detected, misread) {
