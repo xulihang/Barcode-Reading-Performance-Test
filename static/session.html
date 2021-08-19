@@ -15,6 +15,7 @@
           color: red;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.1.2/dist/echarts.min.js"></script>
 </head>
 <body>
     <div id="session">
@@ -33,6 +34,10 @@
 
         <div id="statistics">
             <a href="#" onclick="download_table_as_csv();" id="csv" style="display:none;">Download as CSV</a>
+            <div id="charts" style="display:none;">
+                <div id="accuracy" style="width: 300px;height:300px;display:inline-flex;"></div>
+                <div id="precision" style="width: 300px;height:300px;display:inline-flex;"></div>
+            </div>            
             <div id="engineTable"></div>
         </div>
         
@@ -149,6 +154,8 @@
                 engineTable.innerHTML = "";
                 engineTable.append(overview);
                 engineTable.append(createTable(data));
+                drawCharts("precision",data["precision"]*100);
+                drawCharts("accuracy",data["accuracy"]*100);
                 
             }
         }
@@ -297,6 +304,73 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+    
+    function drawCharts(chartId,data){
+        var chartsContainer = document.getElementById("charts");
+        chartsContainer.style.display = "block";
+        var myChart = echarts.init(document.getElementById(chartId));
+        myChart.setOption(
+            {
+              title: {
+                show: true,
+                text: chartId,
+                x: 'center',
+                textStyle: {
+                  fontWeight: 'normal',
+                  fontSize: 16
+                }
+              },
+              animation: true,
+              tooltip: {
+                show: false
+              },
+              series: [
+                {
+                  name: chartId,
+                  type: 'pie',
+                  radius: ['50%', '70%'],
+                  avoidLabelOverlap: false,
+                  hoverAnimation: false,
+                  silent: true,
+                  labelLine: {
+                    normal: {
+                      show: false
+                    }
+                  },
+                  data: [
+                    {
+                      value: data,
+                      name: chartId,
+                      selected: false,
+                      label: {
+                        normal: {
+                          show: true,
+                          position: 'center',
+                          fontSize: 20,
+                          formatter: '{b}\n{d}%'
+                        }
+                      },
+                      itemStyle: {
+                        color: '#91c7ae'
+                      }
+                    },
+                    {
+                      value: 100-data,
+                      label: {
+                        normal: {
+                          show: false
+                        }
+                      },
+                      itemStyle: {
+                        color: '#eee'
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          )
     }
 </script>
 
