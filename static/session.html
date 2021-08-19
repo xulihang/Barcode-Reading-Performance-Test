@@ -34,6 +34,10 @@
 
         <div id="statistics" style="display:none;">
             <a href="#" onclick="download_table_as_csv();" id="csv">Download as CSV</a>
+            </br>
+            <label>Confidence: <input type="range" id="myRange" onchange="confidenceChanged(this.value)" value="0"><span id="confidence">0</span></label>
+            <pre id="filteredResults">
+            </pre>
             <div id="charts">
                 <div id="accuracy" style="width: 300px;height:300px;display:inline-flex;"></div>
                 <div id="precision" style="width: 300px;height:300px;display:inline-flex;"></div>
@@ -141,7 +145,7 @@
                 console.log(xhr.responseText);
                 var data = JSON.parse(xhr.responseText);
                 var overview = document.createElement("pre");
-                var content = "Precision:"+ data["precision"];
+                var content = "Precision: "+ data["precision"];
                 content = content + "\n" + "Accuracy: " + data["accuracy"];
                 content = content + "\n" + "F1-score: " + data["f1score"];
                 content = content + "\nTotal: " + data["total"];
@@ -371,6 +375,62 @@
               ]
             }
           )
+    }
+    
+    function confidenceChanged(value) {
+        document.getElementById("confidence").innerText = value;
+        recalcuateStatistics();
+    }
+    
+    function recalcuateStatistics(){
+        var confidenceThreshold = parseInt(document.getElementById("confidence").innerText);
+        var rows = document.getElementsByTagName('tr');
+        var detected = 0; //include misreads
+        var misread = 0;
+        var total = rows.length - 1;
+        for (var i=1;i<rows.length;i++) {
+            var row = rows[i];
+            var confidenceList = row.getElementsByTagName("td")[6].innerText.split(", ");
+            var lowConfidence = false;
+            for (var j=0;j<confidenceList.length;j++) {
+                confidence = parseInt(confidenceList[j]);
+                console.log(confidence);
+                if (confidence<confidenceThreshold) {
+                    lowConfidence = true;
+                }
+            }
+            var correct = row.getElementsByTagName("td")[7].innerText;
+            var note = row.getElementsByTagName("td")[8].innerText;
+            if (lowConfidence==false) {
+                if (correct=="true") {
+                    detected = detected + 1;
+                } else {
+                    if (note.indexOf("wrong")!=-1) {
+                        detected = detected + 1;
+                        misread = misread + 1; 
+                    }
+                }
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        }
+        var accuracy = (detected - misread) / total;
+        var precision = (detected - misread) / detected;
+        drawCharts("accuracy",accuracy*100);
+        drawCharts("precision",precision*100);
+        updateFilteredResults(precision, accuracy, total, detected, misread);
+    }
+    
+    function updateFilteredResults(precision, accuracy, total, detected, misread) {
+        var content = "Precision: "+ precision;
+        content = content + "\n" + "Accuracy: " + accuracy;
+        content = content + "\nTotal: " + total;
+        content = content + "\nDetected: " + detected;
+        content = content + "\nUndetected: " + (total - detected);
+        content = content + "\nWrongly detected: " + misread;
+        document.getElementById("filteredResults").innerHTML = content;
+    
     }
 </script>
 
