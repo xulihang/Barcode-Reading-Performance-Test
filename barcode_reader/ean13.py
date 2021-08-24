@@ -1,5 +1,5 @@
-from EAN13_Reader import detect as detector
-from EAN13_Reader import decode as decoder
+import EAN13_Reader.detect as detector
+import EAN13_Reader.decode as decoder
 import cv2
 import os
 import numpy as np
@@ -25,14 +25,14 @@ class EAN13Reader():
                 result = {}
                 result["barcodeFormat"] = "EAN13"
                 result["barcodeText"] = ean13
-                result["x1"] = box[0][0]
-                result["y1"] = box[0][1]
-                result["x2"] = box[1][0]
-                result["y2"] = box[1][1]
-                result["x3"] = box[2][0]
-                result["y3"] = box[2][1]
-                result["x4"] = box[3][0]
-                result["y4"] = box[3][1]
+                result["x1"] = int(box[0][0])
+                result["y1"] = int(box[0][1])
+                result["x2"] = int(box[1][0])
+                result["y2"] = int(box[1][1])
+                result["x3"] = int(box[2][0])
+                result["y3"] = int(box[2][1])
+                result["x4"] = int(box[3][0])
+                result["y4"] = int(box[3][1])
                 results.append(result)
 
         result_dict["results"] = results

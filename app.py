@@ -8,6 +8,9 @@ import uuid
 import cv2
 import numpy as np
 import io
+import sys
+
+print(sys.path.append('./barcode_reader'))
 
 app = Flask(__name__, static_url_path='/', static_folder='static')
 
