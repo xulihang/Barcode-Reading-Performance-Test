@@ -13,8 +13,9 @@ def decode(img):
         try:
             ean13, is_valid = decode_line(thresh[i])
         except Exception as e:
-            print(e)
-            print("failed")
+            #print(e)
+            #print("failed")
+            pass
         if is_valid:
             break
         
@@ -37,12 +38,12 @@ def convert_patterns_to_length(patterns):
         patterns[i] = len(patterns[i])
 
 def read_patterns(patterns,is_left=True):
-    print(len(patterns))
+    #print(len(patterns))
     codes = []
     for i in range(6):
         start_index = i*4
         sliced = patterns[start_index:start_index+4]
-        print(sliced)
+        #print(sliced)
         m1 = sliced[0]
         m2 = sliced[1]
         m3 = sliced[2]
@@ -148,7 +149,7 @@ def read_bars(line):
             current_length = 1
     #remove quite zone
     bars.pop(0)
-    print(len(bars))
+    #print(len(bars))
     return bars
     
 def classify_bars(bars):

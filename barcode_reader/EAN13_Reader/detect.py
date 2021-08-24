@@ -64,7 +64,7 @@ def crop_rect(rect, box, img):
             angle = 0 - (90 - angle)
         else:
             angle = angle
-        print(angle)
+        #print(angle)
 
         M = cv2.getRotationMatrix2D((size[0]/2, size[1]/2), angle, 1.0)
         
