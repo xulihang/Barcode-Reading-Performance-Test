@@ -54,7 +54,9 @@ class Batch_session():
         elif self.engine == "zbar":
             from barcode_reader.zbar import ZbarBarcodeReader
             self.reader = ZbarBarcodeReader()    
-            
+        elif self.engine == "ean13":
+            from barcode_reader.ean13 import EAN13Reader
+            self.reader = EAN13Reader()
     
     def decode_and_save_results(self):
         self.processed = 0

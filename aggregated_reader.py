@@ -18,6 +18,9 @@ class AggregatedReader():
         elif self.engine == "zbar":
             from barcode_reader.zbar import ZbarBarcodeReader
             self.reader = ZbarBarcodeReader()
+        elif self.engine == "ean13":
+            from barcode_reader.ean13 import EAN13Reader
+            self.reader = EAN13Reader()
             
     def decode_file(self, file_path):
         return self.reader.decode_file(file_path)
