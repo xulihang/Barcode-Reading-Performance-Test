@@ -1,0 +1,3 @@
+[submodule "barcode_reader/EAN13_Reader"]
+	path = barcode_reader/EAN13_Reader
+	url = https://github.com/xulihang/EAN13_Reader
