@@ -4,6 +4,7 @@ def decode(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     #cv2.imwrite("gray.jpg",gray)
     ret, thresh =cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    #ret, thresh =cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
     #cv2.imwrite("thresh.jpg",thresh)
     thresh = cv2.bitwise_not(thresh)
     ean13 = None
@@ -29,7 +30,7 @@ def decode_line(line):
     left_codes = read_patterns(left_patterns,is_left=True)
     right_codes = read_patterns(right_patterns,is_left=False)
     ean13 = get_ean13(left_codes,right_codes)
-    #print("Detected code: "+ ean13)
+    print("Detected code: "+ ean13)
     is_valid = verify(ean13)
     return ean13, is_valid
             
@@ -172,12 +173,12 @@ def verify(ean13):
         checksum = 10 - units_digit
     else:
         checksum = 0
-    #print("The checksum of "+ean13 + " is " + str(checksum))
+    print("The checksum of "+ean13 + " is " + str(checksum))
     if checksum == int(ean13[-1]):
-        #print("The code is valid.")
+        print("The code is valid.")
         return True
     else:
-        #print("The code is invalid.")
+        print("The code is invalid.")
         return False
 
 def get_ean13(left_codes,right_codes):

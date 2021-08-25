@@ -10,11 +10,11 @@ def detect(img):
     resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA) #normalize
     
     gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-    #ret, thresh =cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    ret, thresh =cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
-    
+    ret, thresh =cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    #ret, thresh =cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+    thresh = cv2.bitwise_not(thresh)
     kernel = np.ones((3, 20), np.uint8)
-    thresh = cv2.erode(thresh, kernel)
+    thresh = cv2.dilate(thresh, kernel)
     #thresh = cv2.erode(thresh, kernel)
     #thresh = cv2.erode(thresh, kernel)
 
@@ -24,18 +24,28 @@ def detect(img):
     
     candidates = []
     index = 0
+    added_index = []
     for cnt in contours:
         rect = cv2.minAreaRect(cnt)
         box = cv2.boxPoints(rect) 
         box = np.int0(box)
-        area = cv2.contourArea(cnt)
+        #area = cv2.contourArea(cnt)
+        cropped = crop_rect(rect,box,img)
+        width = cropped.shape[1]
+        child_index = hierarchy[0][index][2]
+        parent_index = hierarchy[0][index][3]
         #the min width of EAN13 is 95 pixel
-        width = box[1][0] - box[0][0]
-        if area>95*20 and width<0.9*img.shape[1]:
-            
-            cropped = crop_rect(rect,box,img)
-            candidate = {"cropped": cropped, "rect": rect}
-            candidates.append(candidate)
+        if width>95:
+            #print("current_index: "+str(index))
+            has_overlapped = False
+            if child_index in added_index:
+                has_overlapped = True
+            #if parent_index in added_index:
+            #    has_overlapped = True
+            if has_overlapped == False:
+                added_index.append(index)
+                candidate = {"cropped": cropped, "rect": rect}
+                candidates.append(candidate)
         index = index + 1
     return candidates
 
@@ -78,9 +88,10 @@ def crop_rect(rect, box, img):
 
 
 if __name__ == "__main__":    
-    image = cv2.imread("05102009153.jpg")
+    image = cv2.imread("multiple.jpg")
     candidates = detect(image)
     for i in range(len(candidates)):
-        cv2.imshow(str(i), candidates[i])
+        candidate = candidates[i]
+        cv2.imshow(str(i), candidate["cropped"])
     cv2.waitKey(0)
     cv2.destroyAllWindows()
