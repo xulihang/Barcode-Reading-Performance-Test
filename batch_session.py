@@ -35,7 +35,7 @@ class Batch_session():
         self.processed = 0
         self.load_files_list()
         self.reading = True
-        self.engines = ["dynamsoft","commandline","zxing","zbar"]
+        self.engines = ["dynamsoft","commandline","zxing","zbar","ean13","opencv1d"]
         
         
     def init_reader(self, engine="dynamsoft"):
@@ -57,6 +57,9 @@ class Batch_session():
         elif self.engine == "ean13":
             from barcode_reader.ean13 import EAN13Reader
             self.reader = EAN13Reader()
+        elif self.engine == "opencv1d":
+            from barcode_reader.opencv1d import OpenCV1DReader
+            self.reader = OpenCV1DReader()
     
     def decode_and_save_results(self):
         self.processed = 0

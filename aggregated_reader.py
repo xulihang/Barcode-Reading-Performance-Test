@@ -21,6 +21,9 @@ class AggregatedReader():
         elif self.engine == "ean13":
             from barcode_reader.ean13 import EAN13Reader
             self.reader = EAN13Reader()
+        elif self.engine == "opencv1d":
+            from barcode_reader.opencv1d import OpenCV1DReader
+            self.reader = OpenCV1DReader()
             
     def decode_file(self, file_path):
         return self.reader.decode_file(file_path)
