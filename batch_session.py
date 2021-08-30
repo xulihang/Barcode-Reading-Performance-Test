@@ -257,10 +257,12 @@ class Batch_session():
         target = os.path.join(failed_folder_path,filename)
         copyfile(img_path,target)
         
-    def get_comparison(self,include_details=False):
+    def get_comparison(self,include_details=False,engines=None):
         result = {}
         data_dict = {}
-        for engine in self.engines:
+        if engines == None:
+            engines = self.engines
+        for engine in engines:
             data = self.get_statistics(engine=engine,copy_failed=False)
             data_dict[engine] = data
             engine_result = {}

@@ -129,12 +129,18 @@ def process_engine(engine):
     else:
         return engine
 
-@app.route('/session/<session_id>/comparison/')
+@app.route('/session/<session_id>/comparison/', methods=['POST'])
 def get_session_comparison(session_id):
-    session = get_session(session_id)
-    if session == None:
-        return "Not exist"
-    return session.get_comparison()
+    if request.method == "POST":
+        data=request.get_json()
+        engines = None
+        if data!=None:
+            if "engines" in data:
+                engines = data["engines"]
+        session = get_session(session_id)
+        if session == None:
+            return "Not exist"
+        return session.get_comparison(engines=engines)
     
 @app.route('/session/<session_id>/complete-comparison/')
 def get_session_complete_comparison(session_id):

@@ -41,7 +41,7 @@
         var session_id = document.getElementById("sessionId").innerText;
         var url = "session/"+session_id+"/comparison/"
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', url);
+        xhr.open('POST', url);
         xhr.onreadystatechange = async function(){
             if(xhr.readyState === 4){
                 console.log(xhr.status);
@@ -50,7 +50,7 @@
                 drawChart(data);
             }
         }
-        xhr.send();    
+        xhr.send();
     }
     
     function drawChart(data){
@@ -71,15 +71,6 @@
             one_engine["f1score"] = (100*one_engine["f1score"]).toFixed(2);
             engine_data[key] = one_engine;
         }
-        var labelOption = {
-            show: true,
-            formatter: '{c}  {name|{a}}',
-            fontSize: 16,
-            rich: {
-                name: {
-                }
-            }
-        };
         console.log(engine_data["dynamsoft"]);
         for (var i=0;i<categories.length;i++){
             var category = categories[i];
@@ -122,51 +113,39 @@
                         type: 'value'
                     }
                 ],
-                series: [
-                    {
-                        name: 'DBR',
-                        type: 'bar',
-                        barGap: 0,
-                        label: labelOption,
-                        emphasis: {
-                            focus: 'series'
-                        },
-                        data: [engine_data["dynamsoft"][category]]
-                    },
-                    {
-                        name: 'Scandit',
-                        type: 'bar',
-                        label: labelOption,
-                        emphasis: {
-                            focus: 'series'
-                        },
-                        data: [engine_data["commandline"][category]]
-                    },
-                    {
-                        name: 'Zxing',
-                        type: 'bar',
-                        label: labelOption,
-                        emphasis: {
-                            focus: 'series'
-                        },
-                        data: [engine_data["zxing"][category]]
-                    },
-                    {
-                        name: 'Zbar',
-                        type: 'bar',
-                        label: labelOption,
-                        emphasis: {
-                            focus: 'series'
-                        },
-                        data: [engine_data["zbar"][category]]
-                    }
-                ]
+                series: get_series(engines, engine_data, category)
             };
             // use configuration item and data specified to show chart
             myChart.setOption(option);
         }
-
-
+    }
+    
+    function get_series(engines, engine_data, category) {
+        series = []
+        var labelOption = {
+            show: true,
+            formatter: '{c}  {name|{a}}',
+            fontSize: 16,
+            rich: {
+                name: {
+                }
+            }
+        };
+        for (var i=0;i<engines.length;i++) {
+            engine = engines[i];
+            serie = {
+                        name: engine, 
+                        type: 'bar', 
+                        barGap: 0, 
+                        label: labelOption, 
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: [engine_data[engine][category]]
+                    }
+            series.push(serie);
+        }
+        return series
     }
     
     function get_session_id(){
