@@ -8,6 +8,8 @@ SDKs included:
 2. [Scandit](https://docs.scandit.com/stable/windows/html/2aca5da4-6f94-43a0-9817-5f413d16f100.htm)
 3. [Zxing-cpp](https://github.com/nu-book/zxing-cpp)
 4. [Zbar](https://github.com/NaturalHistoryMuseum/pyzbar/)
+5. [EAN-13 Reader](https://github.com/xulihang/EAN13_Reader)
+6. [OpenCV 1D Reader](https://github.com/opencv/opencv_contrib/tree/master/modules/barcode)
 
 ## Installation
 
