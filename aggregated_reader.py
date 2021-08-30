@@ -24,6 +24,9 @@ class AggregatedReader():
         elif self.engine == "opencv1d":
             from barcode_reader.opencv1d import OpenCV1DReader
             self.reader = OpenCV1DReader()
+        elif self.engine == "boofcv":
+            from barcode_reader.boofcv import BoofCVReader
+            self.reader = BoofCVReader()
             
     def decode_file(self, file_path):
         return self.reader.decode_file(file_path)

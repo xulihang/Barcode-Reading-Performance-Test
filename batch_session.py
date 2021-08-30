@@ -60,6 +60,9 @@ class Batch_session():
         elif self.engine == "opencv1d":
             from barcode_reader.opencv1d import OpenCV1DReader
             self.reader = OpenCV1DReader()
+        elif self.engine == "boofcv":
+            from barcode_reader.boofcv import BoofCVReader
+            self.reader = BoofCVReader()
     
     def decode_and_save_results(self):
         self.processed = 0
