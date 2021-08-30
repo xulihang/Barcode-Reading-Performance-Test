@@ -35,7 +35,8 @@ class Batch_session():
         self.processed = 0
         self.load_files_list()
         self.reading = True
-        self.engines = ["dynamsoft","commandline","zxing","zbar","ean13","opencv1d"]
+        import conf
+        self.engines = conf.engines
         
         
     def init_reader(self, engine="dynamsoft"):
