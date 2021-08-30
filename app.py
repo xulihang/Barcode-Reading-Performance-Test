@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 import io
 import sys
+import pyboof as pb
 
 print(sys.path.append('./barcode_reader'))
 
@@ -169,6 +170,13 @@ def get_ground_truth(session_id, filename):
     ground_truth_list = session.get_ground_truth_list(filename)
     result = {}
     result["ground_truth"] = ground_truth_list
+    return result
+    
+@app.route('/engines')
+def get_engines():
+    import conf
+    result={}
+    result["engines"] = conf.engines
     return result
 
 @app.route('/deocde', methods=['POST'])

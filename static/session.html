@@ -22,12 +22,6 @@
         <p>Session: <span id="sessionId"></span></p>
         Engine: 
         <select id="engine">
-          <option value="dynamsoft">DBR</option>
-          <option value="zxing">ZXing</option>
-          <option value="zbar">Zbar</option>
-          <option value="commandline">CommandLine</option>
-          <option value="ean13">EAN13 Reader</option>
-          <option value="opencv1d">OpenCV 1D</option>
         </select>
         <button type="button" id="decodingButton" onclick='handleDecoding()'>Start Decoding</button>
         <p>Progress: <span id="sessionProgress"></span></p>
@@ -50,6 +44,26 @@
     </div>
 <script>
     get_session_id();
+    loadEngines();
+    
+    function loadEngines() {
+        var url = "engines";
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState === 4){
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                engines = JSON.parse(xhr.responseText)["engines"];
+                var engines_select = document.getElementById("engine");
+                for (var i=0;i<engines.length;i++) {
+                    engines_select.add(new Option(engines[i],engines[i]));
+                }
+            }
+        }
+        xhr.send();
+    }
     
     function get_engine(){
         var engine =  document.getElementById("engine").value;

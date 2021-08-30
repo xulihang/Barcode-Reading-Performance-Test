@@ -30,3 +30,4 @@ class AggregatedReader():
             
     def decode_file(self, file_path):
         return self.reader.decode_file(file_path)
+        
