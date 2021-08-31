@@ -71,6 +71,9 @@ class Batch_session():
         elif self.engine == "boofcv":
             from barcode_reader.boofcv import BoofCVReader
             self.reader = BoofCVReader()
+        elif self.engine == "opencv_wechat":
+            from barcode_reader.opencv_wechat_qrcode import OpenCVWechatQrReader
+            self.reader = OpenCVWechatQrReader()
     
     def decode_and_save_results(self):
         self.processed = 0

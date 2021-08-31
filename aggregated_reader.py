@@ -27,6 +27,10 @@ class AggregatedReader():
         elif self.engine == "boofcv":
             from barcode_reader.boofcv import BoofCVReader
             self.reader = BoofCVReader()
+        elif self.engine == "opencv_wechat":
+            from barcode_reader.opencv_wechat_qrcode import OpenCVWechatQrReader
+            self.reader = OpenCVWechatQrReader()
+            
             
     def decode_file(self, file_path):
         return self.reader.decode_file(file_path)
