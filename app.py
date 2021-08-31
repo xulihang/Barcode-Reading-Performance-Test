@@ -21,6 +21,9 @@ reader = aggregated_reader.AggregatedReader()
 
 tmp_path="./tmp"
 
+if os.path.exists(tmp_path)==False:
+    os.mkdir("tmp")
+
 
 @app.route('/')
 def index():
@@ -70,11 +73,17 @@ def create_session():
         if "folderpath" in data:
             img_folder = data["folderpath"]
             session_name = ""
+            recursive = False
             if "name" in data:
                 session_name = data["name"]
+            
+            if "recursive" in data:
+                if data["recursive"] == "enabled":
+                    recursive = True
+                    
             if os.path.exists(tmp_path) == False:
                 os.mkdir(tmp_path)
-            session = Batch_session(img_folder,tmp_path,name=session_name)
+            session = Batch_session(img_folder,tmp_path,name=session_name,recursive=recursive)
             session_id = session.id
             sessions[session_id]=session
             return {"status":"success","session_id":session_id}
@@ -88,7 +97,10 @@ def get_session(session_id):
         f = open(os.path.join(session_folder,"img_folder"),"r")
         img_folder = f.read()
         f.close()
-        session = Batch_session(img_folder,tmp_path,session_id=session_id)
+        recursive = False
+        if os.path.exists(os.path.join(session_folder,"recursive")):
+            recursive = True    
+        session = Batch_session(img_folder,tmp_path,session_id=session_id,recursive=recursive)
         sessions[session_id]=session
     return session
 
@@ -123,7 +135,6 @@ def get_session_statistics(session_id, engine):
     return session.get_statistics(engine=process_engine(engine))
     
 def process_engine(engine):
-    print(engine)
     if engine == "":
         return "dynamsoft"
     else:
@@ -132,7 +143,7 @@ def process_engine(engine):
 @app.route('/session/<session_id>/comparison/', methods=['POST'])
 def get_session_comparison(session_id):
     if request.method == "POST":
-        data=request.get_json()
+        data=request.get_json(force=True)
         engines = None
         if data!=None:
             if "engines" in data:

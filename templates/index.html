@@ -13,6 +13,7 @@
     </select><br/>
     Name: <input type="text" id="name" name="name" value="Test">
     <button type="button" onclick='createSession()'>Create Session</button>
+    <input type="checkbox" id="recursive" name="recursive" value="Recursive">
     <p>A new window will open.</p>
     
     <div>
@@ -30,6 +31,10 @@
         var xhr = new XMLHttpRequest();
         var pay_load = {};
         pay_load["folderpath"] = document.getElementById("folderpath").value;
+        recursive = document.getElementById("recursive");
+        if (recursive.checked) {
+            pay_load["recursive"]="enabled";
+        }
         pay_load["name"] = document.getElementById("name").value;
 
         xhr.open('POST', url);

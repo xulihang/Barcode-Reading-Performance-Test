@@ -240,7 +240,7 @@
             data.push(index);
 
             var a = document.createElement("a");
-            a.href = "/reader.html?id="+ session_id +"&filename=" + key;
+            a.href = "/reader.html?id="+ session_id +"&filename=" + encodeURIComponent(key);
             a.target = "_blank";
             a.innerText = key;
             data.push(a.outerHTML)

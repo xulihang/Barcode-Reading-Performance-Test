@@ -7,7 +7,7 @@ import uuid
 from shutil import copyfile
 
 class Batch_session():
-    def __init__(self, img_folder, output_folder, template=None,session_id=None, name=""):
+    def __init__(self, img_folder, output_folder, template=None,session_id=None, name="", recursive=False):
         self.img_folder = img_folder
         self.name = name
         self.output_folder = output_folder
@@ -28,12 +28,19 @@ class Batch_session():
             f = open(os.path.join(self.json_folder,"name"),"w")
             f.write(name)
             f.close()
-        
+            
+        if os.path.exists(os.path.join(self.json_folder,"recursive")) == False:
+            if recursive == True:
+                f = open(os.path.join(self.json_folder,"recursive"),"w")
+                f.write("on")
+                f.close()
+                
         self.reader = None
         self.engine = ""
         self.files_list = []
         self.processed = 0
-        self.load_files_list()
+        self.recursive = recursive
+        self.load_files_list(img_folder)
         self.reading = True
         import conf
         self.engines = conf.engines
@@ -92,12 +99,19 @@ class Batch_session():
             json_dict["results"] = results
 
             json_string = json.dumps(json_dict, indent="\t")
+            self.save_decoding_result(filename,json_string)
             
-            f = open(os.path.join(self.json_folder,self.get_json_filename(filename)),"w")
-            f.write(json_string)
-            f.close()
             self.processed=self.processed+1
             
+    def save_decoding_result(self, filename, json_string):
+        json_path = os.path.join(self.json_folder,self.get_json_filename(filename))
+        parent_path = os.path.abspath(os.path.join(json_path, os.pardir))
+        if os.path.exists(parent_path) == False:
+            os.makedirs(parent_path)
+        f = open(json_path,"w")
+        f.write(json_string)
+        f.close()
+        
     def start_reading(self, engine="dynamsoft"):
         self.init_reader(engine)
         self.reading = True
@@ -110,12 +124,18 @@ class Batch_session():
             self.reader.stop_commandline_zmq_server_if_started()
         self.reading = False
             
-    def load_files_list(self):
-        for filename in os.listdir(self.img_folder):
+    def load_files_list(self, folder, inner_folder=None):
+        for filename in os.listdir(folder):
+            path = os.path.join(folder,filename)
             name, ext = os.path.splitext(filename)
             if ext.lower() in ('.png','.jpg','.jpeg','.bmp','.tif', '.tiff','.pdf'):
-                self.files_list.append(filename)
-
+                if inner_folder!=None:
+                    self.files_list.append(os.path.join(inner_folder,filename))
+                else:
+                    self.files_list.append(filename)
+            if os.path.isdir(path) and self.recursive == True:
+                self.load_files_list(path, inner_folder=filename)
+            
     def get_process(self):
         return "{}/{}".format(self.processed, len(self.files_list))
         
@@ -255,6 +275,11 @@ class Batch_session():
         if os.path.exists(failed_folder_path) == False:
             os.mkdir(failed_folder_path)
         target = os.path.join(failed_folder_path,filename)
+
+        parent_path = os.path.abspath(os.path.join(target, os.pardir))
+        if os.path.exists(parent_path) == False:
+            os.makedirs(parent_path)
+        
         copyfile(img_path,target)
         
     def get_comparison(self,include_details=False,engines=None):

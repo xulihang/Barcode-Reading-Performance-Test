@@ -19,12 +19,15 @@
         <p>Session: <span id="sessionId"></span></p>
         <button type="button" onclick='getComparisonStatistics()'>Get Comparison Statistics</button><br/>
         <button type="button" onclick='getDataAndDrawChart()'>Draw Comparison Chart</button><br/>
+        <div id="engines">
+        Engines: 
+        </div>
         <div id="charts" style="display:none;">
-            <div id="accuracy" style="width: 600px;height:400px;"></div>
-            <div id="precision" style="width: 600px;height:400px;"></div>
-            <div id="f1score" style="width: 600px;height:400px;"></div>
-            <div id="timeelapsed" style="width: 600px;height:400px;"></div>
-            <div id="averagetime" style="width: 600px;height:400px;"></div>
+            <div id="accuracy" style="width: 800px;height:400px;"></div>
+            <div id="precision" style="width: 800px;height:400px;"></div>
+            <div id="f1score" style="width: 800px;height:400px;"></div>
+            <div id="timeelapsed" style="width: 800px;height:400px;"></div>
+            <div id="averagetime" style="width: 800px;height:400px;"></div>
         </div>
 
         <div id="statistics">
@@ -36,10 +39,53 @@
     </div>
 <script>
     get_session_id();
+    loadEngines();
+    
+    function loadEngines() {
+        var url = "engines";
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState === 4){
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+                engines = JSON.parse(xhr.responseText)["engines"];
+                var engines_select = document.getElementById("engine");
+                var container = document.getElementById("engines");
+                for (var i=0;i<engines.length;i++) {
+                    var engine = engines[i];
+                    var lbl = document.createElement("label");
+                    var chk = document.createElement("input");
+                    chk.type = "checkbox";
+                    chk.checked = true;
+                    chk.value = engine;
+                    lbl.append(chk);
+                    lbl.append(engine);
+                    container.append(lbl);
+                }
+            }
+        }
+        xhr.send();
+    }
+    
+    function getEnabledEngines() {
+        engines=[];
+        var container = document.getElementById("engines");
+        var chks = container.getElementsByTagName("input");
+        for (var i=0;i<chks.length;i++) {
+            chk = chks[i];
+            if (chk.checked == true) {
+                engines.push(chk.value);
+            }
+        }
+        return engines;
+    }
     
     function getDataAndDrawChart(){
         var session_id = document.getElementById("sessionId").innerText;
         var url = "session/"+session_id+"/comparison/"
+        var pay_load = {"engines":getEnabledEngines()};
         var xhr = new XMLHttpRequest();
         xhr.open('POST', url);
         xhr.onreadystatechange = async function(){
@@ -50,7 +96,9 @@
                 drawChart(data);
             }
         }
-        xhr.send();
+        var json = JSON.stringify(pay_load);
+        console.log(json);
+        xhr.send(json);
     }
     
     function drawChart(data){
@@ -122,10 +170,14 @@
     
     function get_series(engines, engine_data, category) {
         series = []
+        showLabel = true;
+        if (engines.length>4) {
+            showLabel = false;
+        }
         var labelOption = {
-            show: true,
+            show: showLabel,
             formatter: '{c}  {name|{a}}',
-            fontSize: 16,
+            fontSize: 12,
             rich: {
                 name: {
                 }

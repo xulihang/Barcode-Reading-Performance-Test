@@ -106,11 +106,14 @@
         function loadImageIfSessionMode(){
             var sessionId = getSessionID();
             var filename = getFilename();
+            
             if (!!sessionId){
                 if (imageUnsupported(filename))
                 {
+                    filename = encodeURIComponent(filename);
                     appendImg("/session/"+sessionId+"/jpg/"+filename);
                 } else{
+                    filename = encodeURIComponent(filename);
                     appendImg("/session/"+sessionId+"/image/"+filename);
                 }
                 
