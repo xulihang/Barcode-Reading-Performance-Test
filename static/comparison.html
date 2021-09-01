@@ -17,6 +17,9 @@
 <body>
     <div id="session">
         <p>Session: <span id="sessionId"></span></p>
+        <label>Barcodes level:
+        <input type="checkbox" id="barcodes-level" name="barcodes-level" value="barcodes-level"></label>
+        </br>
         <button type="button" onclick='getComparisonStatistics()'>Get Comparison Statistics</button><br/>
         <button type="button" onclick='getDataAndDrawChart()'>Draw Comparison Chart</button><br/>
         <div id="engines">
@@ -105,18 +108,22 @@
         // based on prepared DOM, initialize echarts instance
         var chartsContainer = document.getElementById("charts");
         chartsContainer.style.display = "block";
-        
+        var barcodesLevel = document.getElementById("barcodes-level").checked;
+        affix = "";
+        if (barcodesLevel==true){
+            affix = "_barcodes";
+        }
         var engines = [];
         var categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
         var engine_data = {};
         for (var key in data) {
             engines.push(key);
             var one_engine = data[key];
-            one_engine["accuracy"] = (100*one_engine["accuracy"]).toFixed(2);
-            one_engine["precision"] = (100*one_engine["precision"]).toFixed(2);
+            one_engine["accuracy"] = (100*one_engine["accuracy"+affix]).toFixed(2);
+            one_engine["precision"] = (100*one_engine["precision"+affix]).toFixed(2);
+            one_engine["f1score"] = (100*one_engine["f1score"+affix]).toFixed(2);
             one_engine["time_elapsed"] = one_engine["time_elapsed"].toFixed(2);
             one_engine["average_time"] = one_engine["average_time"].toFixed(2);
-            one_engine["f1score"] = (100*one_engine["f1score"]).toFixed(2);
             engine_data[key] = one_engine;
         }
         console.log(engine_data["dynamsoft"]);

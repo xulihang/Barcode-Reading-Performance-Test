@@ -343,9 +343,11 @@ class Batch_session():
             engine_result = {}
             engine_result["precision"] = data["precision"]
             engine_result["accuracy"] = data["accuracy"]
+            engine_result["precision_barcodes"] = data["precision_barcodes"]
+            engine_result["accuracy_barcodes"] = data["accuracy_barcodes"]
+            engine_result["f1score_barcodes"] = data["f1score_barcodes"]
             engine_result["time_elapsed"] = data["time_elapsed"]
             engine_result["average_time"] = data["average_time"]
-            engine_result["f1score"] = data["f1score"]
             result[engine] = engine_result
         if include_details:
             self.add_comparison_details(result, data_dict)
