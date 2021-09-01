@@ -4,9 +4,13 @@ import base64
 
 
 class DynamsoftBarcodeReader():
-    def __init__(self):
+    def __init__(self,use_intermediate_detection_results=False):
         self.dbr = BarcodeReader()
-        self.dbr.init_license("t0070fQAAAG16DXrR4sc8gNexDekiNrG6xJSiDAabkbAKOyeFtNASIwCzV+Nc6x1GXNVxyJPapcWE++aFwJYBKTFxNqbunQgbAA==")
+        self.dbr.init_license("t0068MgAAABeuHByyqJjhYkoe1ba+47moKW3OoHLWb2JwHGHvuwTDhUr5QclbY42fuYaTgcDjE25ULirxbM+8YfdROdGTJYs=")
+        if use_intermediate_detection_results:
+            settings = self.dbr.get_runtime_settings()
+            settings.intermediate_result_types = EnumIntermediateResultType.IRT_TYPED_BARCODE_ZONE
+            self.dbr.update_runtime_settings(settings)
         if os.path.exists("template.json"):
             print("Found template")
             self.dbr.init_runtime_settings_with_file("template.json")
@@ -34,14 +38,37 @@ class DynamsoftBarcodeReader():
                 result["y3"] =points[2][1]
                 result["x4"] =points[3][0]
                 result["y4"] =points[3][1]
+        self.append_intermediate_results(results)
         result_dict["results"] = results
+        
         return result_dict
+    
+    def append_intermediate_results(self,results):
+        intermediateResults = self.dbr.get_all_intermediate_results()
+        for ir in intermediateResults:
+            for lr in ir.results:
+                result = {}
+                result["barcodeFormat"] = ""
+                result["barcodeText"] = ""
+                result["type"] = "intermediateResult"
+                points = lr.localization_points
+                result["x1"] =points[0][0]
+                result["y1"] =points[0][1]
+                result["x2"] =points[1][0]
+                result["y2"] =points[1][1]
+                result["x3"] =points[2][0]
+                result["y3"] =points[2][1]
+                result["x4"] =points[3][0]
+                result["y4"] =points[3][1]
+                results.append(result)
+        return results
+        
         
 if __name__ == '__main__':
     import time
     reader = DynamsoftBarcodeReader()
     start_time = time.time()
-    results = reader.decode_file("test.jpg")
+    results = reader.decode_file("image045.jpg")
     end_time = time.time()
     elapsedTime = int((end_time - start_time) * 1000)
     print(results)
