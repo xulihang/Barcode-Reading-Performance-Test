@@ -25,10 +25,6 @@
         </select>
         <button type="button" id="decodingButton" onclick='handleDecoding()'>Start Decoding</button>
         <p>Progress: <span id="sessionProgress"></span></p>
-        
-        <label>Barcodes level:
-        <input type="checkbox" id="barcodes-level" name="barcodes-level" value="barcodes-level"></label>
-        </br>
         <button type="button" onclick='getStatistics()'>Get Statistics</button><br/>
         <button type="button" onclick='getToComparisonPage()'>Go to Comparison Page</button><br/>
 
@@ -36,12 +32,29 @@
             <a href="#" onclick="download_table_as_csv();" id="csv">Download as CSV</a>
             </br>
             <label>Confidence: <input type="range" id="myRange" onchange="confidenceChanged(this.value)" value="0"><span id="confidence">0</span></label>
-            <pre id="filteredResults">
-            </pre>
-            <div id="charts">
-                <div id="accuracy" style="width: 300px;height:300px;display:inline-flex;"></div>
-                <div id="precision" style="width: 300px;height:300px;display:inline-flex;"></div>
+            <div id="images-level" class="statistics">
+                <h2>Images level</h2>
+                <pre class="filteredResults">
+                </pre>
+                <div class="charts">
+                    <div class="accuracy" style="width: 300px;height:300px;display:inline-flex;"></div>
+                    <div class="precision" style="width: 300px;height:300px;display:inline-flex;"></div>
+                </div>
+                <pre class="results">
+                </pre>
             </div>
+            <div id="barcodes-level" class="statistics">
+                <h2>Barcodes level</h2>
+                <pre class="filteredResults">
+                </pre>
+                <div class="charts">
+                    <div class="accuracy" style="width: 300px;height:300px;display:inline-flex;"></div>
+                    <div class="precision" style="width: 300px;height:300px;display:inline-flex;"></div>
+                </div>
+                <pre class="results">
+                </pre>
+            </div>
+            
             <div id="engineTable"></div>
         </div>
         
@@ -49,7 +62,6 @@
 <script>
     get_session_id();
     loadEngines();
-    total_barcodes = 0;
     
     function loadEngines() {
         var url = "engines";
@@ -164,24 +176,33 @@
             if(xhr.readyState === 4){
                 console.log(xhr.status);
                 console.log(xhr.responseText);
-                var barcodesLevel = document.getElementById("barcodes-level").checked;
-                affix = ""
-                if (barcodesLevel) {
-                    affix = "_barcodes";
-                }
                 var data = JSON.parse(xhr.responseText);
-                var overview = document.createElement("pre");
-                var content = build_statictics_string(data,affix);
-                content = content + "\nTime elapsed: " + data["time_elapsed"];
-                content = content + "\nAverage time: " + data["average_time"];
+                var containers = document.getElementsByClassName("statistics")
+                for (var i=0;i<len(containers);i++) {
+                    var container = containers[i];
+                    var overview = container.getElementsByClassName("results")[0];
+                    var content;
+                    if (i==0){
+                        content = build_statictics_string(data,"");
+                        time_elapsed = data["time_elapsed"];
+                        average_time = data["average_time"];
+                        content = content + "\nTime elapsed: " + time_elapsed;
+                        content = content + "\nAverage time: " + average_time;
+                        drawCharts(container,"precision",data["precision"]*100);
+                        drawCharts(container,"accuracy",data["accuracy"]*100);
+                    }else{
+                        content = build_statictics_string(data,"_barcodes");
+                        drawCharts(container,"precision",data["precision_barcodes"]*100);
+                        drawCharts(container,"accuracy",data["accuracy_barcodes"]*100);
+                    }
+                    overview.innerHTML = content;
+                }
                 
-                overview.innerHTML = content;
                 var engineTable = document.getElementById("engineTable");
                 engineTable.innerHTML = "";
                 engineTable.append(overview);
                 engineTable.append(createTable(data));
-                drawCharts("precision",data["precision"+affix]*100);
-                drawCharts("accuracy",data["accuracy"+affix]*100);
+
                 
             }
         }
@@ -190,13 +211,13 @@
     }
     
     function build_statictics_string(data, affix) {
-        var precision = data["precision"+affix];
-        var accuracy = data["accuracy"+affix];
-        var f1score = data["f1score"+affix];
-        var total = data["total"+affix];
-        total_barcodes = total;
-        var undetected = data["undetected"+affix]
-        var wrong_detected = data["wrong_detected"+affix]
+        precision = data["precision"+affix];
+        accuracy = data["accuracy"+affix];
+        f1score = data["f1score"+affix];
+        total = data["total"+affix];
+        undetected = data["undetected"+affix]
+        wrong_detected = data["wrong_detected"+affix]
+        
         var content = "Precision: "+ precision;
         content = content + "\n" + "Accuracy: " + accuracy;
         content = content + "\n" + "F1-score: " + f1score;
@@ -205,6 +226,8 @@
         content = content + "\nUndetected: " + undetected;
         content = content + "\nWrongly detected: " + wrong_detected;
         return content
+
+    
     }
     
     function createTable(data){
@@ -216,7 +239,7 @@
         table.appendChild(thead);
         table.appendChild(tbody);
         
-        var headers = ["No.","Filename","Detected Text", "Ground Truth","Barcode Format","Time","Confidence","Correct","Undetected Barcodes","Wrong Detected Barcodes", "Note"];
+        var headers = ["No.","Filename","Detected Text", "Ground Truth","Barcode Format","Time","Confidence","Correct", "Note"];
         let row_1 = document.createElement('tr');
         for (var i =0;i<headers.length;i++){
             let heading = document.createElement('th');
@@ -283,17 +306,6 @@
             }
 
             data.push(correct);
-            undetected_barcodes = 0
-            if ("undetected_barcodes" in imgResult){
-                undetected_barcodes = imgResult["undetected_barcodes"];
-            }
-            data.push(undetected_barcodes);
-            
-            wrong_detected_barcodes = 0
-            if ("wrong_detected_barcodes" in imgResult){
-                wrong_detected_barcodes = imgResult["wrong_detected_barcodes"];
-            }
-            data.push(wrong_detected_barcodes);
             
             var note = "";
             if (imgResult["wrong_detected"]==true){
@@ -361,8 +373,8 @@
         document.body.removeChild(link);
     }
     
-    function drawCharts(chartId,data){
-        var myChart = echarts.init(document.getElementById(chartId));
+    function drawCharts(container,chartClass,data){
+        var myChart = echarts.init(container.getElementsByClassName(chartClass)[0]);
         myChart.setOption(
             {
               title: {
@@ -434,15 +446,11 @@
     function recalculateStatistics(){
         var confidenceThreshold = parseInt(document.getElementById("confidence").innerText);
         var rows = document.getElementsByTagName('tr');
-        var total = rows.length - 1;
         var detected = 0; //include misreads
         var misread = 0;
-        
+        var total = rows.length - 1;
         var indexToBeFiltered = [];
         var indexToBeShown = [];
-        var total_barcodes = 0;
-        var detected_barcodes = 0;
-        var misread_barcodes = 0;
         for (var i=1;i<rows.length;i++) {
             var row = rows[i];
             var confidenceList = row.getElementsByTagName("td")[6].innerText.split(", ");

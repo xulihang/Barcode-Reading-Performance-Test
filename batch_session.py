@@ -227,6 +227,10 @@ class Batch_session():
                         wrong_detected_barcodes = wrong_detected_barcodes + wrong_detected_of_one_image
                         
                         undetected_barcodes = undetected_barcodes + undetected_barcodes_of_one_image
+                        
+                        image_decoding_result["undetected_barcodes"] = undetected_barcodes_of_one_image
+                        image_decoding_result["wrong_detected_barcodes"] = wrong_detected_of_one_image
+                        
                         if wrong_detected_of_one_image > 0:
                             image_decoding_result["wrong_detected"] = True
                             wrong_detected_images = wrong_detected_images +1
