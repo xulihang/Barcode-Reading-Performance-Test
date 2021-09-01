@@ -219,20 +219,20 @@ class Batch_session():
                 ground_truth_list = self.get_ground_truth_list(filename)
                 total_barcodes = total_barcodes + len(ground_truth_list)
                 img_results[filename] = image_decoding_result
+                
+                wrong_detected_of_one_image = 0
+                undetected_barcodes_of_one_image = 0
+                
                 if "results" in image_decoding_result:
                     results=image_decoding_result["results"]
                     if len(results)==0:
                         undetected_images=undetected_images+1
+                        undetected_barcodes_of_one_image = len(ground_truth_list)
+                        
                         failed = True
                     else:
                         total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
                         failed, some_detected, undetected_barcodes_of_one_image, wrong_detected_of_one_image = self.is_barcode_correcly_read(results,ground_truth_list)
-                        wrong_detected_barcodes = wrong_detected_barcodes + wrong_detected_of_one_image
-                        
-                        undetected_barcodes = undetected_barcodes + undetected_barcodes_of_one_image
-                        
-                        image_decoding_result["undetected_barcodes"] = undetected_barcodes_of_one_image
-                        image_decoding_result["wrong_detected_barcodes"] = wrong_detected_of_one_image
                         
                         if wrong_detected_of_one_image > 0:
                             image_decoding_result["wrong_detected"] = True
@@ -241,9 +241,16 @@ class Batch_session():
                             image_decoding_result["partial_success"] = True
                 else:
                     undetected_images=undetected_images+1
+                    undetected_barcodes_of_one_image = len(ground_truth_list)
                     failed = True
                     
                 image_decoding_result["ground_truth"] = ground_truth_list
+                image_decoding_result["undetected_barcodes"] = undetected_barcodes_of_one_image
+                image_decoding_result["wrong_detected_barcodes"] = wrong_detected_of_one_image
+                
+                wrong_detected_barcodes = wrong_detected_barcodes + wrong_detected_of_one_image
+                undetected_barcodes = undetected_barcodes + undetected_barcodes_of_one_image
+                
                 #print("ground truth list")
                 #print(ground_truth_list)
                 image_decoding_result["failed"] = failed
