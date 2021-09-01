@@ -45,23 +45,24 @@ class DynamsoftBarcodeReader():
     
     def append_intermediate_results(self,results):
         intermediateResults = self.dbr.get_all_intermediate_results()
-        for ir in intermediateResults:
-            for lr in ir.results:
-                result = {}
-                result["barcodeFormat"] = ""
-                result["barcodeText"] = ""
-                result["type"] = "intermediateResult"
-                points = lr.localization_points
-                result["x1"] =points[0][0]
-                result["y1"] =points[0][1]
-                result["x2"] =points[1][0]
-                result["y2"] =points[1][1]
-                result["x3"] =points[2][0]
-                result["y3"] =points[2][1]
-                result["x4"] =points[3][0]
-                result["y4"] =points[3][1]
-                results.append(result)
-        return results
+        if intermediateResults!=None:
+            for ir in intermediateResults:
+                for lr in ir.results:
+                    result = {}
+                    result["barcodeFormat"] = ""
+                    result["barcodeText"] = ""
+                    result["type"] = "intermediateResult"
+                    points = lr.localization_points
+                    result["x1"] =points[0][0]
+                    result["y1"] =points[0][1]
+                    result["x2"] =points[1][0]
+                    result["y2"] =points[1][1]
+                    result["x3"] =points[2][0]
+                    result["y3"] =points[2][1]
+                    result["x4"] =points[3][0]
+                    result["y4"] =points[3][1]
+                    results.append(result)
+            return results
         
         
 if __name__ == '__main__':
