@@ -199,6 +199,11 @@ class Batch_session():
         undetected = 0
         wrong_detected = 0
         
+        total_barcodes = 0
+        detected_barcodes = 0
+        undetected_barcodes = 0
+        wrong_detected_barcodes = 0
+        
         for filename in self.files_list:
             json_filename = self.get_json_filename(filename, engine)
             json_path = os.path.join(self.json_folder,json_filename)
@@ -207,6 +212,7 @@ class Batch_session():
                 f = open(json_path,"r",encoding="utf-8")
                 image_decoding_result = json.loads(f.read())
                 ground_truth_list = self.get_ground_truth_list(filename)
+                total_barcodes = total_barcodes + len(ground_truth_list)
                 img_results[filename] = image_decoding_result
                 if "results" in image_decoding_result:
                     results=image_decoding_result["results"]
@@ -214,29 +220,12 @@ class Batch_session():
                         undetected=undetected+1
                         failed = True
                     else:
-                        barcode_text = ""
-                        barcodeFormat = ""
-                        for result in results:
-                            barcode_text = barcode_text + " " + result["barcodeText"]
-                            if barcodeFormat.upper().find("EAN"):
-                                if len(result["barcodeText"]) == 13:
-                                    barcode_text = barcode_text + " " + result["barcodeText"][1:13]
-                            if barcodeFormat.upper().find("UPC"):
-                                if len(result["barcodeText"]) == 12:
-                                    barcode_text = barcode_text + " 0" + result["barcodeText"]
-                                
-                            
                         total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
-                        
-                        some_detected = False
-                        for ground_truth in ground_truth_list:
-                            text = ground_truth["text"].strip()
-                            if barcode_text.find(text) == -1:
-                                wrong_detected=wrong_detected+1
-                                image_decoding_result["wrong_detected"] = True
-                                failed = True
-                            else:
-                                some_detected = True
+                        failed, some_detected, undetected_barcodes_of_one_image, wrong_detected_of_one_image = self.is_barcode_correcly_read(results,ground_truth_list)
+                        wrong_detected = wrong_detected + wrong_detected_of_one_image
+                        undetected_barcodes = undetected_barcodes + undetected_barcodes_of_one_image
+                        if failed == True:
+                            image_decoding_result["wrong_detected"] = True
                         if failed == True and some_detected == True:
                             image_decoding_result["partial_success"] = True
                 else:
@@ -249,8 +238,12 @@ class Batch_session():
                 image_decoding_result["failed"] = failed
                 if failed == True and copy_failed == True:
                     self.copy_undetected_to_failed_folder(filename, engine)
-                
-        total = len(self.files_list)
+
+        if total_barcodes == 0:
+            total = len(self.files_list)
+        else:
+            total = total_barcodes
+            
         detected = total - undetected
         correctly_detected = detected - wrong_detected
         data["img_results"] = img_results
@@ -268,7 +261,33 @@ class Batch_session():
         data["average_time"] = total_elapsedTime / total
         data["f1score"] = 2 * (precision * accuracy) / (precision + accuracy)
         return data
-        
+    
+    def is_barcode_correcly_read(self, results, ground_truth_list):
+        failed = False
+        barcode_text = ""
+        barcodeFormat = ""
+        wrong_detected = 0
+        undetected_barcodes = 0
+        for result in results:
+            barcode_text = barcode_text + " " + result["barcodeText"]
+            if barcodeFormat.upper().find("EAN"):
+                if len(result["barcodeText"]) == 13:
+                    barcode_text = barcode_text + " " + result["barcodeText"][1:13]
+            if barcodeFormat.upper().find("UPC"):
+                if len(result["barcodeText"]) == 12:
+                    barcode_text = barcode_text + " 0" + result["barcodeText"]
+                
+            some_detected = False
+        for ground_truth in ground_truth_list:
+            text = ground_truth["text"].strip()
+            if barcode_text.find(text) == -1:
+                wrong_detected=wrong_detected+1
+                failed = True
+                undetected_barcodes = undetected_barcodes+1
+            else:
+                some_detected = True
+        return failed, some_detected, undetected_barcodes, wrong_detected
+    
     def copy_undetected_to_failed_folder(self, filename, engine="dynamsoft"):
         img_path = os.path.join(self.img_folder,filename)
         if engine == "dynamsoft":
