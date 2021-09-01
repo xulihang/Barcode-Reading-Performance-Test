@@ -197,8 +197,9 @@ class Batch_session():
         data = {}
         img_results = {}
         total_elapsedTime = 0
-        undetected = 0
-        wrong_detected = 0
+        total_images = len(self.files_list)
+        undetected_images = 0
+        wrong_detected_images = 0
         
         total_barcodes = 0
         detected_barcodes = 0
@@ -218,22 +219,21 @@ class Batch_session():
                 if "results" in image_decoding_result:
                     results=image_decoding_result["results"]
                     if len(results)==0:
-                        undetected=undetected+1
+                        undetected_images=undetected_images+1
                         failed = True
                     else:
                         total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
                         failed, some_detected, undetected_barcodes_of_one_image, wrong_detected_of_one_image = self.is_barcode_correcly_read(results,ground_truth_list)
-                        wrong_detected = wrong_detected + wrong_detected_of_one_image
+                        wrong_detected_barcodes = wrong_detected_barcodes + wrong_detected_of_one_image
                         
                         undetected_barcodes = undetected_barcodes + undetected_barcodes_of_one_image
-                        if failed:
-                            undetected = undetected + 1
                         if wrong_detected_of_one_image > 0:
                             image_decoding_result["wrong_detected"] = True
+                            wrong_detected_images = wrong_detected_images +1
                         if failed == True and some_detected == True:
                             image_decoding_result["partial_success"] = True
                 else:
-                    undetected=undetected+1
+                    undetected_images=undetected_images+1
                     failed = True
                     
                 image_decoding_result["ground_truth"] = ground_truth_list
@@ -242,45 +242,43 @@ class Batch_session():
                 image_decoding_result["failed"] = failed
                 if failed == True and copy_failed == True:
                     self.copy_undetected_to_failed_folder(filename, engine)
-
-        if total_barcodes == 0:
-            total = len(self.files_list)
-        else:
-            total = total_barcodes
-            
+        self.append_statistics("",total_images,undetected_images,wrong_detected_images, data)
+        self.append_statistics("_barcodes",total_barcodes,undetected_barcodes,wrong_detected_barcodes, data)
+        data["img_results"] = img_results
+        data["time_elapsed"] = total_elapsedTime
+        data["average_time"] = total_elapsedTime / total_images
+        return data
+        
+    def append_statistics(self, affix, total, undetected, wrong_detected, data):
         detected = total - undetected
         correctly_detected = detected - wrong_detected
-        data["img_results"] = img_results
-        data["total"] = total
-        data["undetected"] = undetected
-        data["wrong_detected"] = wrong_detected
+        data["total"+affix] = total
+        data["undetected"+affix] = undetected
+        data["wrong_detected"+affix] = wrong_detected
         if detected>0:
             precision = correctly_detected / detected
-            data["precision"] = precision
+            data["precision"+affix] = precision
         else:
             precision = 0
-            data["precision"] = ""
+            data["precision"+affix] = ""
         if total>0:
             accuracy = correctly_detected / total
         else:
             accuracy = 0
             
-        data["accuracy"] = accuracy
-        data["time_elapsed"] = total_elapsedTime
-        data["average_time"] = total_elapsedTime / total
+        data["accuracy"+affix] = accuracy
+       
         if precision>0 and accuracy>0:
-            data["f1score"] = 2 * (precision * accuracy) / (precision + accuracy)
+            data["f1score"+affix] = 2 * (precision * accuracy) / (precision + accuracy)
         else:
-            data["f1score"] = 0
-
-        return data
+            data["f1score"+affix] = 0
     
     def is_barcode_correcly_read(self, results, ground_truth_list):
         failed = False
         barcode_text = ""
         barcodeFormat = ""
-        wrong_detected = 0
-        undetected_barcodes = 0
+        undetected_barcodes = []
+        wrong_detected_barcodes = []
         some_detected = False
         for ground_truth in ground_truth_list:
             detected = False
@@ -298,11 +296,14 @@ class Batch_session():
                     some_detected = True
                     break
                 else:
-                    wrong_detected=wrong_detected+1
+                    if result not in wrong_detected_barcodes:
+                        wrong_detected_barcodes.append(result)
             if detected == False:
                 failed = True
-                undetected_barcodes = undetected_barcodes+1
-        return failed, some_detected, undetected_barcodes, wrong_detected
+                if ground_truth not in undetected_barcodes:
+                    undetected_barcodes.append(ground_truth)
+        return failed, some_detected, len(undetected_barcodes), len(wrong_detected_barcodes)
+        
     def is_text_correct(self, result,ground_truth):
         detected_text = result["barcodeText"].strip()
         ground_truth_text = ground_truth["text"].strip()
