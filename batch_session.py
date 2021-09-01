@@ -4,6 +4,7 @@ import os
 import time
 import threading
 import uuid
+import geometry_utils
 from shutil import copyfile
 
 class Batch_session():
@@ -223,8 +224,11 @@ class Batch_session():
                         total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
                         failed, some_detected, undetected_barcodes_of_one_image, wrong_detected_of_one_image = self.is_barcode_correcly_read(results,ground_truth_list)
                         wrong_detected = wrong_detected + wrong_detected_of_one_image
+                        
                         undetected_barcodes = undetected_barcodes + undetected_barcodes_of_one_image
-                        if failed == True:
+                        if failed:
+                            undetected = undetected + 1
+                        if wrong_detected_of_one_image > 0:
                             image_decoding_result["wrong_detected"] = True
                         if failed == True and some_detected == True:
                             image_decoding_result["partial_success"] = True
@@ -250,16 +254,25 @@ class Batch_session():
         data["total"] = total
         data["undetected"] = undetected
         data["wrong_detected"] = wrong_detected
-        precision = correctly_detected / detected
-        accuracy = correctly_detected / total
         if detected>0:
+            precision = correctly_detected / detected
             data["precision"] = precision
         else:
+            precision = 0
             data["precision"] = ""
+        if total>0:
+            accuracy = correctly_detected / total
+        else:
+            accuracy = 0
+            
         data["accuracy"] = accuracy
         data["time_elapsed"] = total_elapsedTime
         data["average_time"] = total_elapsedTime / total
-        data["f1score"] = 2 * (precision * accuracy) / (precision + accuracy)
+        if precision>0 and accuracy>0:
+            data["f1score"] = 2 * (precision * accuracy) / (precision + accuracy)
+        else:
+            data["f1score"] = 0
+
         return data
     
     def is_barcode_correcly_read(self, results, ground_truth_list):
@@ -268,25 +281,39 @@ class Batch_session():
         barcodeFormat = ""
         wrong_detected = 0
         undetected_barcodes = 0
-        for result in results:
-            barcode_text = barcode_text + " " + result["barcodeText"]
-            if barcodeFormat.upper().find("EAN"):
-                if len(result["barcodeText"]) == 13:
-                    barcode_text = barcode_text + " " + result["barcodeText"][1:13]
-            if barcodeFormat.upper().find("UPC"):
-                if len(result["barcodeText"]) == 12:
-                    barcode_text = barcode_text + " 0" + result["barcodeText"]
-                
-            some_detected = False
+        some_detected = False
         for ground_truth in ground_truth_list:
-            text = ground_truth["text"].strip()
-            if barcode_text.find(text) == -1:
-                wrong_detected=wrong_detected+1
+            detected = False
+            for result in results:
+                if result["y1"] != result["y4"]: # not a line
+                    if "x1" in ground_truth: #if there is localization markup
+                        detection_points = geometry_utils.points_of_one_detection_result(result)
+                        ground_truth_points = geometry_utils.points_of_one_detection_result(ground_truth)
+                        iou = geometry_utils.calculate_polygon_iou(detection_points,ground_truth_points)
+                        if iou<=0.0: #if not overlapped
+                            continue
+                correct = self.is_text_correct(result, ground_truth)
+                if correct:
+                    detected = True
+                    some_detected = True
+                    break
+                else:
+                    wrong_detected=wrong_detected+1
+            if detected == False:
                 failed = True
                 undetected_barcodes = undetected_barcodes+1
-            else:
-                some_detected = True
         return failed, some_detected, undetected_barcodes, wrong_detected
+    def is_text_correct(self, result,ground_truth):
+        detected_text = result["barcodeText"].strip()
+        ground_truth_text = ground_truth["text"].strip()
+        barcodeFormat = result["barcodeFormat"]
+        if barcodeFormat.upper().find("UPC") != -1:
+            if len(detected_text) == 12:
+                detected_text = "0" + detected_text
+        if detected_text.find(ground_truth_text) == -1:
+            return False
+        else:
+            return True
     
     def copy_undetected_to_failed_folder(self, filename, engine="dynamsoft"):
         img_path = os.path.join(self.img_folder,filename)
