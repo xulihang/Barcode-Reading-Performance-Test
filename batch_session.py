@@ -60,6 +60,9 @@ class Batch_session():
         elif self.engine == "zxing":
             from barcode_reader.zxing import ZXingBarcodeReader
             self.reader = ZXingBarcodeReader()
+        elif self.engine == "zxingcpp":
+            from barcode_reader.zxingcpp import ZXingBarcodeReader
+            self.reader = ZXingBarcodeReader()
         elif self.engine == "zbar":
             from barcode_reader.zbar import ZbarBarcodeReader
             self.reader = ZbarBarcodeReader()    
