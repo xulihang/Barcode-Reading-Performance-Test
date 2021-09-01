@@ -1,35 +1,45 @@
-import zxingcpp
-from PIL import Image
+from pyzxing import BarCodeReader
 import os
 
 
 class ZXingBarcodeReader():
     def __init__(self):
-        pass
+        self.reader = BarCodeReader()
 
     def decode_file(self, img_path):
         result_dict = {}
         results = []
-        tr = zxingcpp.read_barcode(Image.open(img_path))
+        text_results = self.reader.decode(img_path)
         
-        if tr.valid == True:
-            result = {}
-            result["barcodeFormat"] = tr.format.name
-            result["barcodeText"] = tr.text
-            result["x1"] = tr.position.top_left.x
-            result["y1"] = tr.position.top_left.y
-            result["x2"] = tr.position.top_right.x
-            result["y2"] = tr.position.top_right.y
-            result["x3"] = tr.position.bottom_right.x
-            result["y3"] = tr.position.bottom_right.y
-            result["x4"] = tr.position.bottom_left.x
-            result["y4"] = tr.position.bottom_left.y
-            results.append(result)
+        if text_results!=None:
+            for tr in text_results:
+                if "parsed" in tr:
+                    result = {}
+                    result["barcodeFormat"] = tr["format"].decode("utf-8")
+                    result["barcodeText"] = tr["parsed"].decode("utf-8")
+                    points = tr["points"]
+                    left=points[0][0]
+                    top=points[0][1]
+                    right=points[1][0]
+                    bottom=points[1][1]
+                    for point in points:
+                        left = min(left,point[0])
+                        top = min(top,point[1])
+                        right = max(right,point[0])
+                        bottom = max(bottom,point[1])
+                    result["x1"] = left
+                    result["y1"] = top
+                    result["x2"] = right
+                    result["y2"] = top
+                    result["x3"] = right
+                    result["y3"] = bottom
+                    result["x4"] = left
+                    result["y4"] = bottom
+                    results.append(result)
         result_dict["results"] = results
         return result_dict
         
 if __name__ == '__main__':
     reader = ZXingBarcodeReader()
-    results = reader.decode_file("test.jpg")
+    results = reader.decode_file("black_qr_code.png")
     print(results)
-    
