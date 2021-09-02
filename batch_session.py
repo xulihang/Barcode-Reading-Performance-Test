@@ -196,11 +196,13 @@ class Batch_session():
             return ground_truth_list
         return []
     
-    def get_statistics(self, engine="dynamsoft", copy_failed=True):
+    def get_statistics(self, engine="dynamsoft", copy_failed=True, files_list=[]):
+        if len(files_list)==0:
+            files_list=self.files_list
         data = {}
         img_results = {}
         total_elapsedTime = 0
-        total_images = len(self.files_list)
+        total_images = len(files_list)
         undetected_images = 0
         wrong_detected_images = 0
         
@@ -209,7 +211,7 @@ class Batch_session():
         undetected_barcodes = 0
         wrong_detected_barcodes = 0
         
-        for filename in self.files_list:
+        for filename in files_list:
             json_filename = self.get_json_filename(filename, engine)
             json_path = os.path.join(self.json_folder,json_filename)
             failed = False
@@ -349,7 +351,25 @@ class Batch_session():
         
         copyfile(img_path,target)
         
-    def get_comparison(self,include_details=False,engines=None):
+    
+    def get_comparison_in_category(self,include_details=False,engines=None):
+        result = {}
+        files_list_in_category = {}
+        for filename in self.files_list:
+            category = os.path.dirname(filename)
+            files = []
+            if category in files_list_in_category:
+                files = files_list_in_category[category]
+            files.append(filename)
+            files_list_in_category[category] = files
+        for category in files_list_in_category:
+            result[category] = self.get_comparison(include_details=include_details,engines=engines,files_list=files_list_in_category[category])
+        print(result)
+        return result
+    
+    def get_comparison(self,include_details=False,engines=None,files_list=[]):
+        if len(files_list)==0:
+            files_list=self.files_list
         result = {}
         data_dict = {}
         if engines == None:
@@ -360,6 +380,7 @@ class Batch_session():
             engine_result = {}
             engine_result["precision"] = data["precision"]
             engine_result["accuracy"] = data["accuracy"]
+            engine_result["f1score"] = data["f1score"]
             engine_result["precision_barcodes"] = data["precision_barcodes"]
             engine_result["accuracy_barcodes"] = data["accuracy_barcodes"]
             engine_result["f1score_barcodes"] = data["f1score_barcodes"]

@@ -145,13 +145,19 @@ def get_session_comparison(session_id):
     if request.method == "POST":
         data=request.get_json(force=True)
         engines = None
+        in_category = False
         if data!=None:
             if "engines" in data:
                 engines = data["engines"]
+            if "in_category" in data:
+                in_category = True
         session = get_session(session_id)
         if session == None:
             return "Not exist"
-        return session.get_comparison(engines=engines)
+        if in_category:
+            return session.get_comparison_in_category(engines=engines)
+        else:
+            return session.get_comparison(engines=engines)
     
 @app.route('/session/<session_id>/complete-comparison/')
 def get_session_complete_comparison(session_id):

@@ -20,17 +20,16 @@
         <label>Barcodes level:
         <input type="checkbox" id="barcodes-level" name="barcodes-level" value="barcodes-level"></label>
         </br>
-        <button type="button" onclick='getComparisonStatistics()'>Get Comparison Statistics</button><br/>
+        <label>In categories:
+        <input type="checkbox" id="in-categories" name="in-categories" value="in-categories"></label>
+        </br>
         <button type="button" onclick='getDataAndDrawChart()'>Draw Comparison Chart</button><br/>
+        <button type="button" onclick='getComparisonStatistics()'>Get Comparison Statistics</button><br/>
         <div id="engines">
         Engines: 
         </div>
         <div id="charts" style="display:none;">
-            <div id="accuracy" style="width: 800px;height:400px;"></div>
-            <div id="precision" style="width: 800px;height:400px;"></div>
-            <div id="f1score" style="width: 800px;height:400px;"></div>
-            <div id="timeelapsed" style="width: 800px;height:400px;"></div>
-            <div id="averagetime" style="width: 800px;height:400px;"></div>
+
         </div>
 
         <div id="statistics">
@@ -43,6 +42,10 @@
 <script>
     get_session_id();
     loadEngines();
+    
+    function inCategories(){
+        return document.getElementById("in-categories").checked;
+    }
     
     function loadEngines() {
         var url = "engines";
@@ -89,6 +92,9 @@
         var session_id = document.getElementById("sessionId").innerText;
         var url = "session/"+session_id+"/comparison/"
         var pay_load = {"engines":getEnabledEngines()};
+        if (inCategories()){
+            pay_load["in_category"] = true;
+        }
         var xhr = new XMLHttpRequest();
         xhr.open('POST', url);
         xhr.onreadystatechange = async function(){
@@ -96,7 +102,12 @@
                 console.log(xhr.status);
                 console.log(xhr.responseText);
                 var data = JSON.parse(xhr.responseText);
-                drawChart(data);
+                if (inCategories()){
+                    drawChartInCategories(data);
+                } else{
+                    drawChart(data,true);
+                }
+                
             }
         }
         var json = JSON.stringify(pay_load);
@@ -104,10 +115,24 @@
         xhr.send(json);
     }
     
-    function drawChart(data){
+    function drawChartInCategories(data){
+        for (var category in data) {
+            var chartsContainer = document.getElementById("charts");
+            var head = document.createElement("h2");
+            head.innerText = category;
+            chartsContainer.append(head);
+            drawChart(data[category],false);
+        }
+    
+    }
+    
+    function drawChart(data, clear){
         // based on prepared DOM, initialize echarts instance
         var chartsContainer = document.getElementById("charts");
         chartsContainer.style.display = "block";
+        if (clear == true){
+            chartsContainer.innerHTML = "";
+        }
         var barcodesLevel = document.getElementById("barcodes-level").checked;
         affix = "";
         if (barcodesLevel==true){
@@ -129,9 +154,15 @@
         console.log(engine_data["dynamsoft"]);
         for (var i=0;i<categories.length;i++){
             var category = categories[i];
-            var chartId = category.replace("_","");
-            console.log(chartId);
-            var myChart = echarts.init(document.getElementById(chartId));
+            var chartClass = category.replace("_","");
+            console.log(chartClass);
+            var chartsContainer = document.getElementById("charts");
+            var chart = document.createElement("div");
+            chart.style.width = "800px";
+            chart.style.height = "400px";
+            chart.className = chartClass;
+            chartsContainer.append(chart);
+            var myChart = echarts.init(chart);
             console.log("load data");
             option = {
                 tooltip: {
