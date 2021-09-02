@@ -375,7 +375,7 @@ class Batch_session():
         if engines == None:
             engines = self.engines
         for engine in engines:
-            data = self.get_statistics(engine=engine,copy_failed=False)
+            data = self.get_statistics(engine=engine,copy_failed=False, files_list=files_list)
             data_dict[engine] = data
             engine_result = {}
             engine_result["precision"] = data["precision"]
