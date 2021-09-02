@@ -212,6 +212,7 @@ class Batch_session():
         wrong_detected_barcodes = 0
         
         for filename in files_list:
+            
             json_filename = self.get_json_filename(filename, engine)
             json_path = os.path.join(self.json_folder,json_filename)
             failed = False
@@ -353,6 +354,8 @@ class Batch_session():
         
     
     def get_comparison_in_category(self,include_details=False,engines=None):
+        if engines == None:
+            engines = self.engines
         result = {}
         files_list_in_category = {}
         for filename in self.files_list:
@@ -364,7 +367,6 @@ class Batch_session():
             files_list_in_category[category] = files
         for category in files_list_in_category:
             result[category] = self.get_comparison(include_details=include_details,engines=engines,files_list=files_list_in_category[category])
-        print(result)
         return result
     
     def get_comparison(self,include_details=False,engines=None,files_list=[]):

@@ -119,12 +119,12 @@
                     data_in_categories["Result"] = engine_data;
                     drawChart(engine_data,true);
                 }
+                console.log(data_in_categories);
                 createOverviewTable(data_in_categories);
                 
             }
         }
         var json = JSON.stringify(pay_load);
-        console.log(json);
         xhr.send(json);
     }
     
@@ -143,7 +143,6 @@
         for (var i=0;i<categories.length;i++){
             var category = categories[i];
             var chartClass = category.replace("_","");
-            console.log(chartClass);
             var chartsContainer = document.getElementById("charts");
             var chart = document.createElement("div");
             chart.style.width = "800px";
@@ -151,7 +150,6 @@
             chart.className = chartClass;
             chartsContainer.append(chart);
             var myChart = echarts.init(chart);
-            console.log("load data");
             option = {
                 tooltip: {
                     trigger: 'axis',
@@ -241,9 +239,6 @@
             for (var category in data_in_categories) {
                 var engines_data = data_in_categories[category];
                 var engine_data = engines_data[engine];
-                console.log(data_in_categories);
-                console.log(engine_data);
-                console.log(table_category);
                 data.push(engine_data[table_category])
             }
             
@@ -274,7 +269,6 @@
             one_engine["average_time"] = one_engine["average_time"].toFixed(2);
             engine_data[key] = one_engine;
         }
-        console.log(engine_data["dynamsoft"]);
         return engine_data;
     }
     
@@ -329,8 +323,6 @@
         xhr.open('GET', url);
         xhr.onreadystatechange = async function(){
             if(xhr.readyState === 4){
-                console.log(xhr.status);
-                console.log(xhr.responseText);
                 var data = JSON.parse(xhr.responseText);
                 var comparisonTable = document.getElementById("comparisonTable");
                 comparisonTable.innerHTML = "";
