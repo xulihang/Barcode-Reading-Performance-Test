@@ -322,6 +322,8 @@ class Batch_session():
                 failed = True
                 if ground_truth not in undetected_barcodes:
                     undetected_barcodes.append(ground_truth)
+        if len(undetected_barcodes) == 0: #ignore over detected barcodes
+            wrong_detected_barcodes = []
         return failed, some_detected, len(undetected_barcodes), len(wrong_detected_barcodes)
         
     def is_text_correct(self, result,ground_truth):
