@@ -101,32 +101,31 @@
                 console.log(xhr.status);
                 console.log(xhr.responseText);
                 var data = JSON.parse(xhr.responseText);
-                
+                var data_in_categories = {};
                 if (inCategories()){
-                    drawChartInCategories(data);
+                    var chartsContainer = document.getElementById("charts");
+                    chartsContainer.innerHTML = "";
+                    
+                    for (var category in data) {
+                        var head = document.createElement("h2");
+                        head.innerText = category;
+                        chartsContainer.append(head);
+                        var engine_data = get_engines_data(data[category]);
+                        data_in_categories[category]=engine_data;
+                        drawChart(engine_data,false);
+                    }
                 } else{
                     var engine_data = get_engines_data(data);
+                    data_in_categories["Result"] = engine_data;
                     drawChart(engine_data,true);
                 }
+                createOverviewTable(data_in_categories);
                 
             }
         }
         var json = JSON.stringify(pay_load);
         console.log(json);
         xhr.send(json);
-    }
-    
-    function drawChartInCategories(data){
-        var chartsContainer = document.getElementById("charts");
-        chartsContainer.innerHTML = "";
-        for (var category in data) {
-            var head = document.createElement("h2");
-            head.innerText = category;
-            chartsContainer.append(head);
-            var engine_data = get_engines_data(data[category]);
-            drawChart(engine_data,false);
-        }
-    
     }
     
     function drawChart(engine_data, clear){
@@ -193,6 +192,70 @@
             // use configuration item and data specified to show chart
             myChart.setOption(option);
         }
+    }
+    
+    function createOverviewTable(data_in_categories) {
+        var container = document.getElementById("overview-table");
+        container.innerHTML="";
+        var table_categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
+        for (var i=0;i<table_categories.length;i++) {
+            var h2 = document.createElement("h2");
+            h2.innerText = table_categories[i];
+            var table = createTableOfOneCategory(table_categories[i],data_in_categories);
+            container.append(h2);
+            container.append(table);
+        } 
+    }
+    
+    function createTableOfOneCategory(table_category, data_in_categories){
+        var table = document.createElement('table');
+        var thead = document.createElement('thead');
+        var tbody = document.createElement('tbody');
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        
+        var headers = ["Engine"];
+         for (var category in data_in_categories) {
+            headers.push(category);
+        }
+        let row_1 = document.createElement('tr');
+        for (var i =0;i<headers.length;i++){
+            let heading = document.createElement('th');
+            heading.innerHTML = headers[i];
+            row_1.appendChild(heading);
+        }
+        thead.appendChild(row_1);
+        
+        var engines = [];
+        var engine_data = data_in_categories[headers[1]];
+        for (var engine in engine_data) {
+            engines.push(engine);
+        }
+        
+        for (var i=0;i<engines.length;i++) {
+            var engine = engines[i];
+            var row = document.createElement('tr');
+            var data = [];
+            data.push(engine);
+            for (var category in data_in_categories) {
+                var engines_data = data_in_categories[category];
+                var engine_data = engines_data[engine];
+                console.log(data_in_categories);
+                console.log(engine_data);
+                console.log(table_category);
+                data.push(engine_data[table_category])
+            }
+            
+            for (var j=0;j<data.length;j++) {
+                var c = document.createElement('td');
+                c.innerHTML = data[j];
+                row.appendChild(c);
+            }
+            
+            tbody.appendChild(row);
+        }
+       return table;
     }
     
     function get_engines_data(data){
