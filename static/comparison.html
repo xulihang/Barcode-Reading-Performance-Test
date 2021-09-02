@@ -23,14 +23,13 @@
         <label>In categories:
         <input type="checkbox" id="in-categories" name="in-categories" value="in-categories"></label>
         </br>
-        <button type="button" onclick='getDataAndDrawChart()'>Draw Comparison Chart</button><br/>
+        <button type="button" onclick='getDataAndDrawChartAndTable()'>Draw Comparison Chart and Table</button><br/>
         <button type="button" onclick='getComparisonStatistics()'>Get Comparison Statistics</button><br/>
         <div id="engines">
         Engines: 
         </div>
-        <div id="charts" style="display:none;">
-
-        </div>
+        <div id="overview-table"></div>
+        <div id="charts" style="display:none;"></div>
 
         <div id="statistics">
             <a href="#" onclick="download_table_as_csv();" id=
@@ -88,7 +87,7 @@
         return engines;
     }
     
-    function getDataAndDrawChart(){
+    function getDataAndDrawChartAndTable(){
         var session_id = document.getElementById("sessionId").innerText;
         var url = "session/"+session_id+"/comparison/"
         var pay_load = {"engines":getEnabledEngines()};
@@ -102,10 +101,12 @@
                 console.log(xhr.status);
                 console.log(xhr.responseText);
                 var data = JSON.parse(xhr.responseText);
+                
                 if (inCategories()){
                     drawChartInCategories(data);
                 } else{
-                    drawChart(data,true);
+                    var engine_data = get_engines_data(data);
+                    drawChart(engine_data,true);
                 }
                 
             }
@@ -116,42 +117,30 @@
     }
     
     function drawChartInCategories(data){
+        var chartsContainer = document.getElementById("charts");
+        chartsContainer.innerHTML = "";
         for (var category in data) {
-            var chartsContainer = document.getElementById("charts");
             var head = document.createElement("h2");
             head.innerText = category;
             chartsContainer.append(head);
-            drawChart(data[category],false);
+            var engine_data = get_engines_data(data[category]);
+            drawChart(engine_data,false);
         }
     
     }
     
-    function drawChart(data, clear){
+    function drawChart(engine_data, clear){
         // based on prepared DOM, initialize echarts instance
         var chartsContainer = document.getElementById("charts");
         chartsContainer.style.display = "block";
         if (clear == true){
             chartsContainer.innerHTML = "";
         }
-        var barcodesLevel = document.getElementById("barcodes-level").checked;
-        affix = "";
-        if (barcodesLevel==true){
-            affix = "_barcodes";
-        }
         var engines = [];
-        var categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
-        var engine_data = {};
-        for (var key in data) {
-            engines.push(key);
-            var one_engine = data[key];
-            one_engine["accuracy"] = (100*one_engine["accuracy"+affix]).toFixed(2);
-            one_engine["precision"] = (100*one_engine["precision"+affix]).toFixed(2);
-            one_engine["f1score"] = (100*one_engine["f1score"+affix]).toFixed(2);
-            one_engine["time_elapsed"] = one_engine["time_elapsed"].toFixed(2);
-            one_engine["average_time"] = one_engine["average_time"].toFixed(2);
-            engine_data[key] = one_engine;
+        for (var engine in engine_data) {
+            engines.push(engine);
         }
-        console.log(engine_data["dynamsoft"]);
+        var categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
         for (var i=0;i<categories.length;i++){
             var category = categories[i];
             var chartClass = category.replace("_","");
@@ -204,6 +193,26 @@
             // use configuration item and data specified to show chart
             myChart.setOption(option);
         }
+    }
+    
+    function get_engines_data(data){
+        var barcodesLevel = document.getElementById("barcodes-level").checked;
+        affix = "";
+        if (barcodesLevel==true){
+            affix = "_barcodes";
+        }
+        var engine_data = {};
+        for (var key in data) {
+            var one_engine = data[key];
+            one_engine["accuracy"] = (100*one_engine["accuracy"+affix]).toFixed(2);
+            one_engine["precision"] = (100*one_engine["precision"+affix]).toFixed(2);
+            one_engine["f1score"] = (100*one_engine["f1score"+affix]).toFixed(2);
+            one_engine["time_elapsed"] = one_engine["time_elapsed"].toFixed(2);
+            one_engine["average_time"] = one_engine["average_time"].toFixed(2);
+            engine_data[key] = one_engine;
+        }
+        console.log(engine_data["dynamsoft"]);
+        return engine_data;
     }
     
     function get_series(engines, engine_data, category) {
