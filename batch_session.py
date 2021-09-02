@@ -212,8 +212,8 @@ class Batch_session():
         for filename in self.files_list:
             json_filename = self.get_json_filename(filename, engine)
             json_path = os.path.join(self.json_folder,json_filename)
+            failed = False
             if os.path.exists(json_path):
-                failed = False
                 f = open(json_path,"r",encoding="utf-8")
                 image_decoding_result = json.loads(f.read())
                 ground_truth_list = self.get_ground_truth_list(filename)
@@ -237,6 +237,9 @@ class Batch_session():
                         if wrong_detected_of_one_image > 0:
                             image_decoding_result["wrong_detected"] = True
                             wrong_detected_images = wrong_detected_images +1
+                        else:
+                            if failed == True:
+                                undetected_images=undetected_images+1
                         if failed == True and some_detected == True:
                             image_decoding_result["partial_success"] = True
                 else:
