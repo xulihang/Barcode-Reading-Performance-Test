@@ -5,12 +5,27 @@ import json
 def read_data_as_dict(folder_path,filename):
     path=os.path.join(folder_path,filename)
     f=open(path,"r")
+    content = f.read()
+    f.close()
+    
+    points_in_lines = False
+    if content.find("SET")==-1:
+        print(filename)
+        print("single code")
+        points_in_lines = True
+        
+    f=open(path,"r")
     lines = f.readlines()
     f.close()
+    
     barcodes = []
+    barcode = {"attrib": {"Type": "QR"}, "text": "", "value_attrib": {}}
+    index = 1
     for line in lines:
         line = line.strip()
         points = line.split(" ")
+        print(points)
+        print(len(points))
         if len(points)==8:
             barcode = {"attrib": {"Type": "QR"}, "text": "", "value_attrib": {}}
             barcode["x1"] = points[0]
@@ -22,6 +37,12 @@ def read_data_as_dict(folder_path,filename):
             barcode["x4"] = points[6]
             barcode["y4"] = points[7]
             barcodes.append(barcode)
+        if len(points)==2:
+            barcode["x"+str(index)] = points[0]
+            barcode["y"+str(index)] = points[1]
+            index = index+1
+    if points_in_lines:
+        barcodes.append(barcode)
     return barcodes
     
 
