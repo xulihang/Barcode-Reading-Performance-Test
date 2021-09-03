@@ -42,6 +42,11 @@
     <div id="status"></div>
     <div id="imgContainer" style="width:100%;position:relative;">
     </div>
+    <div>
+    <p>DBR template:</p>
+    <textarea></textarea>
+    </div>
+    
     <script>
         var results = [];
         window.onresize = updateSVGSize;
@@ -152,6 +157,12 @@
             }
             
             pay_load["engine"] = getEngine();
+            
+            var template = document.getElementsByTagName("textarea")[0].value;
+            if (template!=""){
+                pay_load["settings"] = template;
+            }
+            console.log(template);
             
             xhr.open('POST', url);
             xhr.setRequestHeader('content-type', 'application/json'); 
