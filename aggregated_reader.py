@@ -33,8 +33,12 @@ class AggregatedReader():
         elif self.engine == "opencv_wechat":
             from barcode_reader.opencv_wechat_qrcode import OpenCVWechatQrReader
             self.reader = OpenCVWechatQrReader()
-            
-            
-    def decode_file(self, file_path):
+    
+    def decode_file(self, file_path,settings=""):
+        if settings!="":
+            try:
+                self.reader.set_runtime_settings_with_template(settings)
+            except:
+                print("wrong settings")
         return self.reader.decode_file(file_path)
         

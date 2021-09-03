@@ -208,19 +208,22 @@ def decode():
     engine = data["engine"]
     reader.engine = engine
     reader.init_reader()
+    settings = ""
+    if "settings" in data:
+        settings = data["settings"]
     if "base64" in data:
         image_data = base64.b64decode(data["base64"])
         path = uuid.uuid1().hex
         file = open(path,'wb')
         file.write(image_data)
         file.close()
-        results = reader.decode_file(os.path.abspath(path))
+        results = reader.decode_file(os.path.abspath(path),settings=settings)
         os.remove(path)
         return results
     elif "session_id" in data:
         session_id = data["session_id"]
         filename = data["filename"]
-        return reader.decode_file(get_image_path(session_id,filename))
+        return reader.decode_file(get_image_path(session_id,filename),settings=settings)
     else:
         return "No valid data"
         

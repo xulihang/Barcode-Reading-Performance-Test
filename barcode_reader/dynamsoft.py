@@ -15,6 +15,9 @@ class DynamsoftBarcodeReader():
             print("Found template")
             self.dbr.init_runtime_settings_with_file("template.json")
 
+    def set_runtime_settings_with_template(self, template):
+        self.dbr.init_runtime_settings_with_string(template, conflict_mode=EnumConflictMode.CM_OVERWRITE)
+        
     def decode_file(self, img_path, engine=""):
         result_dict = {}
         results = []
