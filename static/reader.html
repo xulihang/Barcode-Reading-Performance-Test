@@ -24,6 +24,7 @@
         <a href="/reader.html">Exit session mode</a>
         <p>Session: <span id="sessionId"></span></p>
         <p>Filename: <span id="filename"></span></p>
+        <button type="button" onclick='showGroundTruth()'>Show Ground Truth</button>
     </div>
     Engine: 
     <select id="engine">
@@ -198,15 +199,24 @@
             polygon.setAttribute("onmouseover","mouseover(this)");
             polygon.setAttribute("index",index);
             
+            var text = "";
+            if ("barcodeText" in result){
+                text = result.barcodeText;
+            }
+            
+            if ("text" in result){
+                text = result.text;
+            }
             var title = document.createElementNS("http://www.w3.org/2000/svg","title");
-            title.textContent = result.barcodeText;
+            title.textContent = text;
             polygon.append(title);
+            
             
             svg.append(polygon);
             
             var resultList = document.getElementById("result-list");
             var listItem = document.createElement("li");
-            listItem.innerText=result.barcodeText;
+            listItem.innerText=text;
             listItem.setAttribute("index",index);
             resultList.append(listItem);
         }
@@ -307,6 +317,24 @@
                 var ele=elements[0];
                 ele.remove();
             }
+        }
+        
+        function showGroundTruth(){
+            var url = "/session/"+getSessionID()+"/ground_truth/"+encodeURIComponent(getFilename());
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url);
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState === 4){
+                    console.log(xhr.status);
+                    console.log(xhr.responseText);
+                    updateStatus("");
+                    if (xhr.status==200){
+                        results = JSON.parse(xhr.responseText)["ground_truth"];
+                        showResults(results);
+                    }
+                }
+            }
+            xhr.send();
         }
         
     </script>

@@ -219,7 +219,11 @@
             headers.push(category);
             categories_number = categories_number + 1;
         }
-        headers.push("total average")
+        
+        if (categories_number>1){
+            headers.push("total average");
+        }
+        
         
         let row_1 = document.createElement('tr');
         for (var i =0;i<headers.length;i++){
@@ -249,7 +253,9 @@
                 total = total + parseFloat(value);
             }
             
-            data.push((total/categories_number).toFixed(2));
+            if (categories_number>1){
+                data.push((total/categories_number).toFixed(2));
+            }
             
             for (var j=0;j<data.length;j++) {
                 var c = document.createElement('td');
