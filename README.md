@@ -10,6 +10,9 @@ SDKs included:
 4. [Zbar](https://github.com/NaturalHistoryMuseum/pyzbar/)
 5. [EAN-13 Reader](https://github.com/xulihang/EAN13_Reader)
 6. [OpenCV 1D Reader](https://github.com/opencv/opencv_contrib/tree/master/modules/barcode)
+7. [ZXing](https://github.com/zxing/zxing/)
+8. [OpenCV Wechat QR Detector](https://github.com/opencv/opencv_contrib/tree/master/modules/wechat_qrcode)
+9. [Boofcv](https://boofcv.org/)
 
 ## Installation
 
@@ -21,7 +24,9 @@ Optional:
 
 Some barcode reading SDKs don't provide a Python library. For such cases, we can create a command line tool using the provided SDKs and communicate with the server with [ZeroMQ](https://zeromq.org/).
 
-This is how Scandit is integrated. You can see the example here: <https://github.com/xulihang/BarcodeReader_CommandLine/tree/main/Scandit>
+This is how Scandit and ZXing are integrated. You can see the example here: <https://github.com/xulihang/BarcodeReader_CommandLine/>
+
+You have to put the commandline executive files under the `commandline` folder.
 
 ## How to Use
 
