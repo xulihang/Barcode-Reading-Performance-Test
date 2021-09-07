@@ -1,0 +1,3 @@
+java
+-jar
+./commandline/zxing/ZXing-Server.jar

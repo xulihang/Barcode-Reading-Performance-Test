@@ -57,9 +57,12 @@ class Batch_session():
         elif self.engine == "commandline":
             from barcode_reader.commandline import CommandLineBarcodeReader
             self.reader = CommandLineBarcodeReader()
+        elif self.engine == "scandit":
+            from barcode_reader.commandline import CommandLineBarcodeReader
+            self.reader = CommandLineBarcodeReader()
         elif self.engine == "zxing":
-            from barcode_reader.zxing import ZXingBarcodeReader
-            self.reader = ZXingBarcodeReader()
+            from barcode_reader.commandline import CommandLineBarcodeReader
+            self.reader = CommandLineBarcodeReader(port=5557,config_path="zxing_commandline")
         elif self.engine == "zxingcpp":
             from barcode_reader.zxingcpp import ZXingBarcodeReader
             self.reader = ZXingBarcodeReader()
