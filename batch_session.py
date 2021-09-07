@@ -62,13 +62,13 @@ class Batch_session():
             self.reader = CommandLineBarcodeReader()
         elif self.engine == "zxing":
             from barcode_reader.commandline import CommandLineBarcodeReader
-            self.reader = CommandLineBarcodeReader(port=5557,config_path="zxing_commandline")
+            self.reader = CommandLineBarcodeReader(port=5557, config_path="zxing_commandline")
         elif self.engine == "zxingcpp":
             from barcode_reader.zxingcpp import ZXingBarcodeReader
             self.reader = ZXingBarcodeReader()
         elif self.engine == "zbar":
             from barcode_reader.zbar import ZbarBarcodeReader
-            self.reader = ZbarBarcodeReader()    
+            self.reader = ZbarBarcodeReader()
         elif self.engine == "ean13":
             from barcode_reader.ean13 import EAN13Reader
             self.reader = EAN13Reader()
@@ -228,7 +228,7 @@ class Batch_session():
                 
                 wrong_detected_of_one_image = 0
                 undetected_barcodes_of_one_image = 0
-                
+                total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
                 if "results" in image_decoding_result:
                     results=image_decoding_result["results"]
                     if len(results)==0:
@@ -237,7 +237,6 @@ class Batch_session():
                         
                         failed = True
                     else:
-                        total_elapsedTime=total_elapsedTime+int(image_decoding_result["elapsedTime"])
                         failed, some_detected, undetected_barcodes_of_one_image, wrong_detected_of_one_image = self.is_barcode_correcly_read(results,ground_truth_list)
                         
                         if wrong_detected_of_one_image > 0:
