@@ -202,7 +202,7 @@ def get_engines():
     result["engines"] = conf.engines
     return result
 
-@app.route('/deocde', methods=['POST'])
+@app.route('/decode', methods=['POST'])
 def decode():
     data = request.get_json()
     engine = data["engine"]
