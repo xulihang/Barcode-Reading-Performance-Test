@@ -107,12 +107,12 @@
                     chartsContainer.innerHTML = "";
                     
                     for (var category in data) {
-                        var head = document.createElement("h2");
-                        head.innerText = category;
-                        chartsContainer.append(head);
+                        //var head = document.createElement("h2");
+                        //head.innerText = category;
+                        //chartsContainer.append(head);
                         var engine_data = get_engines_data(data[category]);
                         data_in_categories[category]=engine_data;
-                        drawChart(engine_data,false);
+                        //drawChart(engine_data,false);
                     }
                 } else{
                     var engine_data = get_engines_data(data);
@@ -120,6 +120,7 @@
                     drawChart(engine_data,true);
                 }
                 console.log(data_in_categories);
+                drawChartInCategories(data_in_categories);
                 createOverviewTable(data_in_categories);
                 
             }
@@ -127,7 +128,130 @@
         var json = JSON.stringify(pay_load);
         xhr.send(json);
     }
+
+    function drawChartInCategories(data_in_categories, clear){
+        // based on prepared DOM, initialize echarts instance
+        var chartsContainer = document.getElementById("charts");
+        chartsContainer.style.display = "block";
+        if (clear == true){
+            chartsContainer.innerHTML = "";
+        }
+
+        var image_categories = [];
+        for (var category in data_in_categories) {
+            image_categories.push(category);
+        }
+        var engines = [];
+        image_categories
+        var engines_data = data_in_categories[category];
+        for (var engine in engines_data) {
+            engines.push(engine);
+        }
+        var categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
+        for (var i=0;i<categories.length;i++){
+            var category = categories[i];
+            var chartClass = category.replace("_","");
+            var chartsContainer = document.getElementById("charts");
+            var chart = document.createElement("div");
+            chart.style.width = "1600px";
+            chart.style.height = "400px";
+            chart.className = chartClass;
+            chartsContainer.append(chart);
+            var myChart = echarts.init(chart);
+            option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    data: engines
+                },
+                toolbox: {
+                    show: true,
+                    orient: 'vertical',
+                    left: 'right',
+                    top: 'center',
+                    feature: {
+                        mark: {show: true},
+                        dataView: {show: true, readOnly: false},
+                        magicType: {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+                        restore: {show: true},
+                        saveAsImage: {show: true}
+                    }
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisTick: {show: false},
+                        data: image_categories,
+                        axisLabel:{
+                            rotate: 45,
+                            interval: 0
+                        
+                        }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: get_series_in_categories(image_categories, data_in_categories, engines, category)
+            };
+            // use configuration item and data specified to show chart
+            myChart.setOption(option);
+        }
+    }
     
+    function get_series_in_categories(image_categories, data_in_categories, engines, statistics_category) {
+        series = []
+        var labelOption = {
+            show: false,
+            formatter: '{c}  {name|{a}}',
+            rotate: 90,
+            fontSize: 12,
+            align: 'left',
+            verticalAlign: 'middle',
+            position: 'insideBottom',
+            rich: {
+                name: {
+                }
+            }
+        };
+        console.log(image_categories);
+            console.log(data_in_categories);
+            console.log(engines);
+
+        for (var j=0;j<engines.length;j++) {
+            var data = [];
+            var engine = engines[j];
+            for (var k=0;k<image_categories.length;k++) {
+                var category = image_categories[k];
+                var engines_data = data_in_categories[category];
+                var engine_data = engines_data[engine];
+                var value = engine_data[statistics_category];
+                data.push(value);
+            }
+            
+            
+            serie = {
+                        name: engine, 
+                        type: 'bar', 
+                        barGap: 0, 
+                        label: labelOption, 
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: data
+                    }
+            series.push(serie);
+        }
+        
+        return series
+    }
+
     function drawChart(engine_data, clear){
         // based on prepared DOM, initialize echarts instance
         var chartsContainer = document.getElementById("charts");
