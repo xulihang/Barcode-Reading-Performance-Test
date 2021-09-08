@@ -16,6 +16,16 @@
           stroke:green;
           stroke-width:5;
         }
+        
+        .highlighted-polygon {
+          fill:rgba(85,240,40,0.5);
+          stroke:green;
+          stroke-width:5;
+        }
+        
+        .highlighted-listitem {
+          font-weight:bold;
+        }
       </style>
 </head>
 
@@ -32,6 +42,7 @@
     </select>
     <input type="file" id="barcode-file" onchange="loadfile()" accept=".jpg,.jpeg,.png,.bmp" />
     <button type="button" onclick='decode_session_file()'>Decode</button>
+    <label>Enable Annotation:<input type="checkbox" id="annotation-mode" name="annotation-mode" value="Enable Annotation"></label>
     <div id="resultContainer">
         Result:
         <ol id="result-list"></ol>
@@ -213,6 +224,7 @@
             polygon.setAttribute("points",points);
             polygon.setAttribute("class","barcode-polygon");
             polygon.setAttribute("onmouseover","mouseover(this)");
+            polygon.setAttribute("onmouseout","mouseout(this)");
             polygon.setAttribute("index",index);
             
             var text = "";
@@ -234,11 +246,45 @@
             var listItem = document.createElement("li");
             listItem.innerText=text;
             listItem.setAttribute("index",index);
+            listItem.setAttribute("onmouseover","listitem_onmouseover(this)");
+            listItem.setAttribute("onmouseout","listitem_onmouseout(this)");
             resultList.append(listItem);
         }
         
-        function mouseover(polygon){
-            console.log(polygon.getAttribute("index"));
+        function mouseover(element){
+            var index = element.getAttribute("index");
+            setHighLight(index,"li","highlighted-listitem");
+        }
+        
+        function mouseout(element){
+            var index = element.getAttribute("index");
+            setHighLight(index,"li","");
+        }
+        
+        function listitem_onmouseover(element){
+            var index = element.getAttribute("index");
+            setHighLight(index,"polygon","highlighted-polygon");
+        }
+        
+        function listitem_onmouseout(element){
+            var index = element.getAttribute("index");
+            setHighLight(index,"polygon","barcode-polygon");
+        }
+        
+        function setHighLight(index, tagName, className){
+            if (tagName=="polygon"){
+                var items = document.getElementsByTagNameNS("http://www.w3.org/2000/svg",tagName);
+            }else{
+                var items = document.getElementsByTagName(tagName);
+            }
+            console.log(items);
+            for (var i=0;i<items.length;i++){
+                var item = items[i];
+                if (item.getAttribute("index") == index) {
+                    item.setAttribute("class",className)
+                    break;
+                }
+            }
         }
         
         function getPointsData(result,image){
