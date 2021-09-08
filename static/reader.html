@@ -26,6 +26,10 @@
         .highlighted-listitem {
           font-weight:bold;
         }
+        
+        .delete-btn {
+            margin-left: 1em;
+        }
       </style>
 </head>
 
@@ -244,11 +248,49 @@
             
             var resultList = document.getElementById("result-list");
             var listItem = document.createElement("li");
-            listItem.innerText=text;
+            if (document.getElementById("annotation-mode").checked){
+                var btn = document.createElement("button");
+                btn.setAttribute("type","button");
+                btn.setAttribute("index",index);
+                btn.setAttribute("class","delete-btn");
+                btn.innerText = "Delete";
+                btn.setAttribute("onclick","deleteBtn_onlick(this)");
+                var textSpan = document.createElement("span");
+                textSpan.setAttribute("contenteditable",true);
+                textSpan.innerText = text;
+                listItem.innerHTML = textSpan.outerHTML + btn.outerHTML;
+            } else{
+                var textSpan = document.createElement("span");
+                textSpan.innerText = text;
+                listItem.innerHTML = textSpan.outerHTML;
+            }
+            
             listItem.setAttribute("index",index);
             listItem.setAttribute("onmouseover","listitem_onmouseover(this)");
             listItem.setAttribute("onmouseout","listitem_onmouseout(this)");
             resultList.append(listItem);
+        }
+        
+        function deleteBtn_onlick(btn){
+            var index = btn.getAttribute("index");
+            deleteOneResult(index);
+        }
+        
+        function deleteOneResult(index){
+            var listItems = getItems("li");
+            var polygons = getItems("polygon");
+            var jointItems = [listItems,polygons];
+            for (var i=0;i<jointItems.length;i++){
+                var items = jointItems[i];
+                for (var j=0;j<items.length;j++){
+                    var item = items[j];
+                    console.log(item);
+                    if (item.getAttribute("index") == index) {
+                        item.remove();
+                    }
+                }
+            }
+            
         }
         
         function mouseover(element){
@@ -271,13 +313,17 @@
             setHighLight(index,"polygon","barcode-polygon");
         }
         
-        function setHighLight(index, tagName, className){
+        function getItems(tagName){
             if (tagName=="polygon"){
                 var items = document.getElementsByTagNameNS("http://www.w3.org/2000/svg",tagName);
             }else{
                 var items = document.getElementsByTagName(tagName);
             }
-            console.log(items);
+            return items;
+        }
+        
+        function setHighLight(index, tagName, className){
+            var items = getItems(tagName);
             for (var i=0;i<items.length;i++){
                 var item = items[i];
                 if (item.getAttribute("index") == index) {
@@ -406,7 +452,8 @@
                 var polygon = polygons[i];
                 points = polygon.points;
                 var groundTruth = {};
-                groundTruth["text"] = polygon.getElementsByTagName("title")[0].textContent;
+                //groundTruth["text"] = polygon.getElementsByTagName("title")[0].textContent;
+                groundTruth["text"] = getTextInListItem(polygon.getAttribute("index"));
                 for (var j=0;j<4;j++){
                     groundTruth["x"+(j+1)] = points[j].x;
                     groundTruth["y"+(j+1)] = points[j].y;
@@ -423,6 +470,17 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+        
+        function getTextInListItem(index){
+            var listItems = document.getElementsByTagName("li");
+            for (var i=0;i<listItems.length;i++){
+                var listItem = listItems[i];
+                if (listItem.getAttribute("index") == index){
+                    var span = listItem.getElementsByTagName("span")[0];
+                    return span.innerText;
+                }
+            }
         }
     </script>
 </body>
