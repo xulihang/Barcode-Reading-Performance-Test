@@ -111,6 +111,8 @@
     
     
     <script>
+        var convertedIndex = -1;
+        var convertedPolygonsText = "";
         var createdPoints = [];
         var results = [];
         window.onresize = updateSVGSize;
@@ -309,6 +311,7 @@
             polygon.setAttribute("class","barcode-polygon");
             polygon.setAttribute("onmouseover","mouseover(this)");
             polygon.setAttribute("onmouseout","mouseout(this)");
+            polygon.setAttribute("onmouseup","polygon_mouseup(this)");
             polygon.setAttribute("index",index);
             
             var text = "";
@@ -344,7 +347,8 @@
                 textSpan.innerText = text;
                 listItem.innerHTML = textSpan.outerHTML;
             }
-            
+            textSpan.setAttribute("index",index);
+            textSpan.setAttribute("onchange","textSpan_changed(this)");
             listItem.setAttribute("index",index);
             listItem.setAttribute("onmouseover","listitem_onmouseover(this)");
             listItem.setAttribute("onmouseout","listitem_onmouseout(this)");
@@ -377,6 +381,37 @@
         function mouseout(element){
             var index = element.getAttribute("index");
             setHighLight(index,"li","");
+        }
+        
+        function polygon_mouseup(polygon){
+            var e = event;
+            if (e.button == 2){
+                convertPolygonToCircles(polygon);
+            }
+            
+        }
+        
+        function convertPolygonToCircles(polygon){
+            createdPoints = [];
+            var points = polygon.points;
+            
+            for (var i=0;i<points.length;i++){
+                var svgpoint = points[i];
+                console.log(svgpoint);
+                var point = [svgpoint.x,svgpoint.y];
+                createdPoints.push(point);
+            }
+            console.log(createdPoints);
+            drawCurrentPoints();
+            convertedIndex=polygon.getAttribute("index");
+            polygon.remove();
+        }
+        
+        function textSpan_changed(span){
+            console.log("changed");
+            var index = span.getAttribute("index");
+            var result = results[index];
+            result["text"] = span.innerText();
         }
         
         function listitem_onmouseover(element){
@@ -621,12 +656,20 @@
         function convertCreatedPointsToResult(){
             var result = {};
             result["text"] = "";
+            if (convertedIndex!=-1){
+                result = results[convertedIndex];
+            }
             for (var i=0;i<createdPoints.length;i++) {
                 var point = createdPoints[i];
                 result["x"+(i+1)] = point[0];
                 result["y"+(i+1)] = point[1];
             }
-            results.push(result)
+            if (convertedIndex==-1){
+                results.push(result);
+            }else{
+                results[convertedIndex]=result;
+                convertedIndex=-1;
+            }
             showResults(results);
         }
         
