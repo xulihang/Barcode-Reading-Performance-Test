@@ -56,6 +56,22 @@
         #resultContainer {
             width: 100%;
         }
+        circle{
+            r: 6;
+            fill: rgb(0, 255, 0);
+            stroke: rgb(255, 255, 255);
+            stroke-width: 4;
+        }
+        circle:hover{
+            r: 8;
+            fill: rgb(0, 255, 0);
+            stroke: rgb(255, 255, 255);
+            stroke-width: 4;
+        }
+        line{
+            stroke: rgb(0, 0, 255);
+            stroke-width: 4;
+        }
       </style>
 </head>
 
@@ -95,6 +111,7 @@
     
     
     <script>
+        var createdPoints = [];
         var results = [];
         window.onresize = updateSVGSize;
         getSessionID();
@@ -230,6 +247,8 @@
         }
         
         function showResults(results){
+            createdPoints=[];
+            clearPreviousDrawings();
             var imgContainer = document.getElementById("imgContainer");
             var image = imgContainer.getElementsByTagName("img")[0];
             var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
@@ -238,6 +257,26 @@
             svg.style.left = 0;
             svg.style.position = "absolute";
             svg.setAttribute("viewBox","0 0 "+image.naturalWidth+" "+image.naturalHeight);
+            if (document.getElementById("annotation-mode").checked){
+                svg.style.cursor = "crosshair";
+                svg.setAttribute("oncontextmenu","return false;")
+                svg.onmousedown = function (event) {
+                    console.log(event);
+                    if (event.button == 2){
+                        event.preventDefault();
+                        //svg.oncontextmenu = nocontextmenu;
+                        createdPoints.pop();
+                    }else {
+                        if (createdPoints.length>=4){
+                            alert("Exceed maximum points which is 4.");
+                        }else{
+                            createdPoints.push(getPosition(event.offsetX,event.offsetY));
+                        }
+                        
+                    }
+                    drawCurrentPoints();
+                }
+            }
             clearPreviousResults();
             for(let j = 0; j < results.length; j++){
                 showResult(j, svg, image)
@@ -286,7 +325,7 @@
                 btn.setAttribute("index",index);
                 btn.setAttribute("class","delete-btn");
                 btn.innerText = "Delete";
-                btn.setAttribute("onclick","deleteBtn_onlick(this)");
+                btn.setAttribute("onclick","deleteBtn_clicked(this)");
                 var textSpan = document.createElement("span");
                 textSpan.setAttribute("contenteditable",true);
                 textSpan.innerText = text;
@@ -303,27 +342,25 @@
             resultList.append(listItem);
         }
         
-        function deleteBtn_onlick(btn){
+        function deleteBtn_clicked(btn){
             var index = btn.getAttribute("index");
-            deleteOneResult(index);
+            results = removeElement(results,index);
+            console.log(index);
+            console.log(results);
+            showResults(results);
         }
         
-        function deleteOneResult(index){
-            var listItems = getItems("li");
-            var polygons = getItems("polygon");
-            var jointItems = [listItems,polygons];
-            for (var i=0;i<jointItems.length;i++){
-                var items = jointItems[i];
-                for (var j=0;j<items.length;j++){
-                    var item = items[j];
-                    console.log(item);
-                    if (item.getAttribute("index") == index) {
-                        item.remove();
-                    }
+        function removeElement(arr, index) {
+            var result=[];
+            for(var i=0; i<arr.length; i++){
+                if(i!=index){
+                    result.push(arr[i]);
                 }
             }
-            
+            return result;
         }
+
+
         
         function mouseover(element){
             var index = element.getAttribute("index");
@@ -513,6 +550,79 @@
                     return span.innerText;
                 }
             }
+        }
+        
+        
+        function drawCurrentPoints(){
+            clearPreviousDrawings();
+            var previousPoint;
+            for (var i=0;i<createdPoints.length;i++) {
+                var point = createdPoints[i];
+                console.log(point);
+                if (i==0){
+                    createCircle(point);
+                }else{
+                    createLine(previousPoint,point);
+                }
+                previousPoint = point;
+            }
+        }
+        
+        function clearPreviousDrawings(){
+            var svg = imgContainer.getElementsByTagName("svg")[0];
+            if (!!svg){
+                clearElements(svg,"circle");
+                clearElements(svg,"line");
+            }
+            
+        }
+        
+        function createLine(previousPoint,point){
+            var svg = imgContainer.getElementsByTagName("svg")[0];
+            var line = document.createElementNS("http://www.w3.org/2000/svg","line");
+            line.setAttribute("x1",previousPoint[0]);
+            line.setAttribute("y1",previousPoint[1]);
+            line.setAttribute("x2",point[0]);
+            line.setAttribute("y2",point[1]);
+            svg.append(line);
+        }
+        
+        function createCircle(point){
+            var svg = imgContainer.getElementsByTagName("svg")[0];
+            var circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+            circle.setAttribute("cx",point[0]);
+            circle.setAttribute("cy",point[1]);
+            circle.onmousedown = function (event) {
+                if (createdPoints.length==4){
+                    convertCreatedPointsToResult();
+                }
+                event.stopPropagation();
+            }
+            
+            svg.append(circle);
+        }
+        
+        function convertCreatedPointsToResult(){
+            var result = {};
+            result["text"] = "";
+            for (var i=0;i<createdPoints.length;i++) {
+                var point = createdPoints[i];
+                result["x"+(i+1)] = point[0];
+                result["y"+(i+1)] = point[1];
+            }
+            results.push(result)
+            showResults(results);
+        }
+        
+        function getPosition(x,y){
+            var point = [];
+            var imgContainer = document.getElementById("imgContainer");
+            var image = imgContainer.getElementsByTagName("img")[0];
+            var percent = 1.0;
+            percent = image.naturalWidth/image.width;
+            point.push(percent*x);
+            point.push(percent*y);
+            return point;
         }
     </script>
 </body>
