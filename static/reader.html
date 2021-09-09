@@ -24,11 +24,41 @@
         }
         
         .highlighted-listitem {
-          font-weight:bold;
+          background: gray;
         }
         
         .delete-btn {
             margin-left: 1em;
+        }
+        
+        .container {
+            margin-top:2em;
+            display: flex;
+        }
+        
+        .left-container {
+            display: flex;
+            width: 30%;
+        }
+        
+        .right-container {
+            margin-left: 2em;
+            display: flex;
+            max-height: 600px;
+            overflow: auto;
+        }
+        #result-list{
+            overflow-wrap: anywhere;
+            max-height: 600px;
+            overflow: auto;
+        }
+        
+        #resultContainer {
+            width: 100%;
+        }
+        
+        li {
+            width: fit-content;
         }
       </style>
 </head>
@@ -47,20 +77,26 @@
     <input type="file" id="barcode-file" onchange="loadfile()" accept=".jpg,.jpeg,.png,.bmp" />
     <button type="button" onclick='decode_session_file()'>Decode</button>
     <label>Enable Annotation:<input type="checkbox" id="annotation-mode" name="annotation-mode" value="Enable Annotation"></label>
-    <div id="resultContainer">
-        Result:
-        <ol id="result-list"></ol>
-        <button type="button" onclick='exportAsGroundTruth()'>Export as Ground Truth</button>
-        
-    </div>
-    <br/>
-    <div id="status"></div>
-    <div id="imgContainer" style="width:100%;position:relative;">
+    <span id="status"></span>
+    <div class="container">
+        <div class="left-container">
+            <div id="resultContainer">
+                Result:
+                <ol id="result-list"></ol>
+                <button type="button" onclick='exportAsGroundTruth()'>Export as Ground Truth</button>
+            </div>
+        </div>
+        <div class="right-container">
+            <div id="imgContainer" style="width:100%;position:relative;"></div>
+        </div>
+      
+
     </div>
     <div>
-    <p>DBR template:</p>
-    <textarea></textarea>
+        <p>DBR template:</p>
+        <textarea></textarea>
     </div>
+    
     
     <script>
         var results = [];
