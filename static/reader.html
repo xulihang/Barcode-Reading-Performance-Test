@@ -658,6 +658,7 @@
             result["text"] = "";
             if (convertedIndex!=-1){
                 result = results[convertedIndex];
+                result["text"] = getTextInListItem(convertedIndex);
             }
             for (var i=0;i<createdPoints.length;i++) {
                 var point = createdPoints[i];
