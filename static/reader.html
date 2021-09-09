@@ -261,7 +261,7 @@
                 svg.style.cursor = "crosshair";
                 svg.setAttribute("oncontextmenu","return false;")
                 svg.onmousedown = function (event) {
-                    console.log(event);
+                    svg.setAttribute("mousedown","true");
                     if (event.button == 2){
                         event.preventDefault();
                         //svg.oncontextmenu = nocontextmenu;
@@ -276,6 +276,15 @@
                     }
                     drawCurrentPoints();
                 }
+                svg.onmousemove = function (event) {
+                    moveSelectedCircle(event);
+                }
+                
+                svg.onmouseup = function (event) {
+                    svg.setAttribute("mousedown","false");
+                    resetCircleStatus();
+                }
+                 
             }
             clearPreviousResults();
             for(let j = 0; j < results.length; j++){
@@ -345,8 +354,6 @@
         function deleteBtn_clicked(btn){
             var index = btn.getAttribute("index");
             results = removeElement(results,index);
-            console.log(index);
-            console.log(results);
             showResults(results);
         }
         
@@ -558,10 +565,10 @@
             var previousPoint;
             for (var i=0;i<createdPoints.length;i++) {
                 var point = createdPoints[i];
-                console.log(point);
                 if (i==0){
-                    createCircle(point);
+                    createCircle(point,i);
                 }else{
+                    createCircle(point,i);
                     createLine(previousPoint,point);
                 }
                 previousPoint = point;
@@ -574,7 +581,6 @@
                 clearElements(svg,"circle");
                 clearElements(svg,"line");
             }
-            
         }
         
         function createLine(previousPoint,point){
@@ -587,16 +593,26 @@
             svg.append(line);
         }
         
-        function createCircle(point){
+        function createCircle(point,index){
             var svg = imgContainer.getElementsByTagName("svg")[0];
             var circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
             circle.setAttribute("cx",point[0]);
             circle.setAttribute("cy",point[1]);
+            
             circle.onmousedown = function (event) {
-                if (createdPoints.length==4){
-                    convertCreatedPointsToResult();
+                if (index==0){
+                    if (createdPoints.length==4){
+                        convertCreatedPointsToResult();
+                    }
                 }
+                svg.setAttribute("mousedown","true");
+                circle.setAttribute("mousedown","true");
+                circle.setAttribute("pressedX",event.offsetX);
+                circle.setAttribute("pressedY",event.offsetY);
                 event.stopPropagation();
+            }
+            circle.onmouseup = function (event) {
+                circle.setAttribute("mousedown","false");
             }
             
             svg.append(circle);
@@ -620,9 +636,59 @@
             var image = imgContainer.getElementsByTagName("img")[0];
             var percent = 1.0;
             percent = image.naturalWidth/image.width;
-            point.push(percent*x);
-            point.push(percent*y);
+            point.push(parseInt(percent*x));
+            point.push(parseInt(percent*y));
             return point;
+        }
+        
+        function moveSelectedCircle(event){
+            var svg = document.getElementsByTagName("svg")[0];
+            if (svg.getAttribute("mousedown") == "false"){
+                return;
+            }
+            var circles = document.getElementsByTagName("circle");
+            var selectedCircle;
+            var index = 0;
+            for (var i=0;i<circles.length;i++){
+                var circle = circles[i];
+                if (circle.getAttribute("mousedown")=="true") {    selectedCircle = circle;
+                    index=i;
+                    break;
+                
+                }
+            }
+            
+            if (!!selectedCircle){
+                var left = event.offsetX;
+                var top = event.offsetY;
+                var point = getPosition(left,top);
+                createdPoints[index]=getPosition(left,top);
+                selectedCircle.setAttribute("cx",point[0]);
+                selectedCircle.setAttribute("cy",point[1]);
+                redrawLines();
+            }
+        }
+        
+        function redrawLines(){
+            var svg = imgContainer.getElementsByTagName("svg")[0];
+            clearElements(svg,"line");
+            var previousPoint;
+            for (var i=0;i<createdPoints.length;i++) {
+                var point = createdPoints[i];
+                if (i>0){
+                    createLine(previousPoint,point);
+                }
+                previousPoint = point;
+            }
+        }
+        
+        function resetCircleStatus(){
+            var svg = imgContainer.getElementsByTagName("svg")[0];
+            var circles = svg.getElementsByTagName("circle");
+            for (var i=0;i<circles.length;i++){
+                circle = circles[i];
+                circle.removeAttribute("mousedown");
+            }
         }
     </script>
 </body>
