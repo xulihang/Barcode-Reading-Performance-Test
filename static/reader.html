@@ -95,6 +95,7 @@
             <div id="resultContainer">
                 Result:
                 <ol id="result-list"></ol>
+                <button type="button" onclick='saveChanges()'>Save Changes</button>
                 <button type="button" onclick='exportAsGroundTruth()'>Export as Ground Truth</button>
             </div>
         </div>
@@ -733,6 +734,17 @@
                 circle = circles[i];
                 circle.removeAttribute("mousedown");
             }
+        }
+        
+        function saveChanges(){
+            var listItems = document.getElementsByTagName("li");
+            for (var i=0;i<listItems.length;i++){
+                var listItem = listItems[i];
+                var index = listItem.getAttribute("index")
+                var span = listItem.getElementsByTagName("span")[0];
+                results[index]["text"]=span.innerText;
+            }
+            alert("Saved.")
         }
     </script>
 </body>
