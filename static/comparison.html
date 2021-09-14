@@ -291,13 +291,12 @@ opencv_wechat,OpenCV Wechat</textarea>
     function get_series_in_categories(image_categories, data_in_categories, engines, statistics_category) {
         series = []
         var labelOption = {
-            show: false,
-            formatter: '{c}  {name|{a}}',
+            show: true,
             rotate: 90,
             fontSize: 12,
             align: 'left',
             verticalAlign: 'middle',
-            position: 'insideBottom',
+            position: 'top',
             rich: {
                 name: {
                 }
@@ -487,24 +486,19 @@ opencv_wechat,OpenCV Wechat</textarea>
     }
     
     function get_series(engines, engine_data, category) {
-        series = []
-        showLabel = true;
+        var series = []
+        var showLabel = true;
         if (engines.length>4) {
             showLabel = false;
         }
         var labelOption = {
-            show: showLabel,
-            formatter: '{c}  {name|{a}}',
-            fontSize: 12,
-            rich: {
-                name: {
-                }
-            }
+            show: true,
+            position: 'top'
         };
         for (var i=0;i<engines.length;i++) {
-            engine = engines[i];
+            var engine = engines[i];
             serie = {
-                        name: engine, 
+                        name: namesDict[engine], 
                         type: 'bar', 
                         barGap: 0, 
                         label: labelOption, 
