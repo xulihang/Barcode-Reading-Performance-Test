@@ -15,6 +15,9 @@ class AggregatedReader():
         elif self.engine == "scandit":
             from barcode_reader.commandline import CommandLineBarcodeReader
             self.reader = CommandLineBarcodeReader()
+        elif self.engine == "accusoft":
+            from barcode_reader.commandline import CommandLineBarcodeReader
+            self.reader = CommandLineBarcodeReader(port=5558,config_path="accusoft_commandline")
         elif self.engine == "zxing":
             from barcode_reader.commandline import CommandLineBarcodeReader
             self.reader = CommandLineBarcodeReader(port=5557,config_path="zxing_commandline")

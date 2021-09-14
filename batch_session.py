@@ -43,6 +43,7 @@ class Batch_session():
         self.recursive = recursive
         self.load_files_list(img_folder)
         self.reading = True
+        self.current_template_path = ""
         import conf
         self.engines = conf.engines
         
@@ -60,6 +61,9 @@ class Batch_session():
         elif self.engine == "scandit":
             from barcode_reader.commandline import CommandLineBarcodeReader
             self.reader = CommandLineBarcodeReader()
+        elif self.engine == "accusoft":
+            from barcode_reader.commandline import CommandLineBarcodeReader
+            self.reader = CommandLineBarcodeReader(port=5558,config_path="accusoft_commandline")
         elif self.engine == "zxing":
             from barcode_reader.commandline import CommandLineBarcodeReader
             self.reader = CommandLineBarcodeReader(port=5557, config_path="zxing_commandline")
@@ -81,14 +85,34 @@ class Batch_session():
         elif self.engine == "opencv_wechat":
             from barcode_reader.opencv_wechat_qrcode import OpenCVWechatQrReader
             self.reader = OpenCVWechatQrReader()
+            
+    def update_dbr_runtime_settings_if_needed(self, img_path):
+        if self.engine == "dynamsoft" or self.engine == "":
+            parent_path = os.path.abspath(os.path.join(img_path, os.pardir))
+            template_path = os.path.join(parent_path, "template.json")
+            if self.current_template_path!=template_path:
+                if os.path.exists(template_path):
+                    self.current_template_path=template_path
+                    f = open(template_path,"r")
+                    settings = f.read()
+                    f.close()
+                    try:
+                        self.reader.set_runtime_settings_with_template(settings)
+                        print("runtime settings updated")
+                    except:
+                        print("wrong settings")
+                else:
+                    self.reader.reset_runtime_settings()
     
     def decode_and_save_results(self):
         self.processed = 0
         for filename in self.files_list:
             print("Decoding "+filename)
+            
             if self.reading == False:
                 print("Stopped")
                 return
+            self.update_dbr_runtime_settings_if_needed(os.path.join(self.img_folder,filename))
             start_time = time.time()
             result_dict = {}
             results = []
