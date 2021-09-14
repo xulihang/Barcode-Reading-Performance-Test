@@ -46,8 +46,8 @@
             Display Name Settings:
             </br>
             <textarea>dynamsoft,DBR
-accusoft,Comercial SDK A
-scandit,Comercial SDK B
+accusoft,Commercial SDK A
+scandit,Commercial SDK B
 zxing,Zxing
 zxingcpp,ZxingCPP
 zbar,Zbar
@@ -165,7 +165,13 @@ opencv_wechat,OpenCV Wechat</textarea>
                     drawChart(engine_data,true);
                 }
                 console.log(data_in_categories);
+                
+                //var d = {};
+                //d["lots"] = data_in_categories["lots"];
+                //delete data_in_categories["lots"];
+                //data_in_categories = d;
                 drawChartInCategories(data_in_categories);
+                
                 createOverviewTable(data_in_categories);
                 
             }
@@ -317,7 +323,7 @@ opencv_wechat,OpenCV Wechat</textarea>
             
             serie = {
                         name: namesDict[engine], 
-                        type: 'bar', 
+                        type: 'bar',
                         barGap: 0, 
                         label: labelOption, 
                         emphasis: {
@@ -338,9 +344,10 @@ opencv_wechat,OpenCV Wechat</textarea>
         if (clear == true){
             chartsContainer.innerHTML = "";
         }
-        var engines = [];
-        for (var engine in engine_data) {
-            engines.push(engine);
+        var engines = getEnabledEngines();
+        var engine_names = [];
+        for (var i=0;i<engines.length;i++) {
+            engine_names.push(namesDict[engines[i]]);
         }
         var categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
         for (var i=0;i<categories.length;i++){
@@ -361,7 +368,7 @@ opencv_wechat,OpenCV Wechat</textarea>
                     }
                 },
                 legend: {
-                    data: engines
+                    data: engine_names
                 },
                 toolbox: {
                     show: true,
@@ -476,6 +483,9 @@ opencv_wechat,OpenCV Wechat</textarea>
         for (var key in data) {
             var one_engine = data[key];
             one_engine["accuracy"] = (100*one_engine["accuracy"+affix]).toFixed(2);
+            if (parseInt(one_engine["accuracy"])==100){
+                one_engine["accuracy"]=100;
+            }
             one_engine["precision"] = (100*one_engine["precision"+affix]).toFixed(2);
             one_engine["f1score"] = (100*one_engine["f1score"+affix]).toFixed(2);
             one_engine["time_elapsed"] = one_engine["time_elapsed"].toFixed(2);
