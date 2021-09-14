@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Barcode Reader</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+    <style>
+        .barcode-polygon {
+          fill:rgba(85,240,40,0);          
+          stroke:green;
+          stroke-width:5;
+        }
+        
+        .barcode-polygon:hover {
+          fill:rgba(85,240,40,0.5);
+          stroke:green;
+          stroke-width:5;
+        }
+      </style>
+</head>
+
+<body>
+    <div id="sessionInfo">
+        <a href="/reader.html">Exit session mode</a>
+        <p>Session: <span id="sessionId"></span></p>
+        <p>Filename: <span id="filename"></span></p>
+        <button type="button" onclick='showGroundTruth()'>Show Ground Truth</button>
+    </div>
+    <br/>
+    Engine: 
+    <select id="engine">
+    </select>
+    <input type="file" id="barcode-file" onchange="loadfile()" accept=".jpg,.jpeg,.png,.bmp" />
+    <button type="button" onclick='decode_session_file()'>Decode</button>
+    <div id="resultContainer">
+        Result:
+        <ol id="result-list"></ol>
+        <button type="button" onclick='exportAsGroundTruth()'>Export as Ground Truth</button>
+        
+    </div>
+    <br/>
+    <div id="status"></div>
+    <div id="imgContainer" style="width:100%;position:relative;">
+    </div>
+    <div>
+    <p>DBR template:</p>
+    <textarea></textarea>
+    </div>
+    
+    <script>
+        var results = [];
+        window.onresize = updateSVGSize;
+        getSessionID();
+        getFilename();
+        var sessionMode = true;
+        setSessionMode();
+        loadImageIfSessionMode();
+        loadEngines();
+        
+        function loadEngines() {
+            var url = "engines";
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url);
+
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState === 4){
+                    console.log(xhr.status);
+                    console.log(xhr.responseText);
+                    engines = JSON.parse(xhr.responseText)["engines"];
+                    var engines_select = document.getElementById("engine");
+                    for (var i=0;i<engines.length;i++) {
+                        engines_select.add(new Option(engines[i],engines[i]));
+                    }
+                }
+            }
+            xhr.send();
+        }
+        
+        function updateSVGSize() {
+            var imgContainer =document.getElementById("imgContainer");
+            var image = imgContainer.getElementsByTagName("img")[0];
+            var svg = imgContainer.getElementsByTagName("svg")[0];
+            svg.style.width=image.width;
+        }
+        
+        function setSessionMode(){
+            var sessionId = getUrlParam("id");
+            if (!!sessionId) {
+                var fileInput = document.getElementById("barcode-file");
+                console.log(fileInput);
+                fileInput.style.display = "none";
+                sessionMode = true;
+            } else {
+                sessionMode = false;
+                var sessionInfo = document.getElementById("sessionInfo");
+                sessionInfo.style.display = "none";
+            }
+        }
+        
+        function getSessionID(){
+            var sessionId = getUrlParam("id");
+            document.getElementById("sessionId").innerText = sessionId;
+            return sessionId;
+        }
+        
+        function getFilename(){
+            var filename = getUrlParam("filename");
+            document.getElementById("filename").innerText = filename;
+            return filename;
+        }
+        
+        function getEngine(){
+            var engine =  document.getElementById("engine").value;
+            return engine;
+        }
+        
+        function loadImageIfSessionMode(){
+            var sessionId = getSessionID();
+            var filename = getFilename();
+            
+            if (!!sessionId){
+                if (imageUnsupported(filename))
+                {
+                    filename = encodeURIComponent(filename);
+                    appendImg("/session/"+sessionId+"/jpg/"+filename);
+                } else{
+                    filename = encodeURIComponent(filename);
+                    appendImg("/session/"+sessionId+"/image/"+filename);
+                }
+                
+            }
+        }
+        
+        function getUrlParam(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+        
+        function updateStatus(status){
+            var statusDiv = document.getElementById("status");
+            statusDiv.innerHTML = status;
+        }
+        
+        function decode_session_file(){
+            var url = "decode";
+            var xhr = new XMLHttpRequest();
+            var pay_load = {};
+            
+            if (sessionMode==true){
+                pay_load["session_id"] = getSessionID();
+                pay_load["filename"] = getFilename();
+            }else {
+                var base64 = getImageData();
+                base64 = base64.substring(base64.indexOf(",")+1,base64.length) 
+                pay_load["base64"] = base64;
+            }
+            
+            pay_load["engine"] = getEngine();
+            
+            var template = document.getElementsByTagName("textarea")[0].value;
+            if (template!=""){
+                pay_load["settings"] = template;
+            }
+            console.log(template);
+            
+            xhr.open('POST', url);
+            xhr.setRequestHeader('content-type', 'application/json'); 
+
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState === 4){
+                    console.log(xhr.status);
+                    console.log(xhr.responseText);
+                    updateStatus("");
+                    if (xhr.status==200){
+                        results = JSON.parse(xhr.responseText)["results"];
+                        showResults(results);
+                    }
+                }
+            }
+            updateStatus("Decoding...");
+            xhr.send(JSON.stringify(pay_load));
+        }
+        
+        function showResults(results){
+            var imgContainer = document.getElementById("imgContainer");
+            var image = imgContainer.getElementsByTagName("img")[0];
+            var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+            svg.style.width = image.width;
+            svg.style.top = 0;
+            svg.style.left = 0;
+            svg.style.position = "absolute";
+            svg.setAttribute("viewBox","0 0 "+image.naturalWidth+" "+image.naturalHeight);
+            clearPreviousResults();
+            for(let j = 0; j < results.length; j++){
+                showResult(j, svg, image)
+            }
+            imgContainer.append(svg);
+        }
+        
+        function clearPreviousResults(){
+            var resultList = document.getElementById("result-list");
+            clearElements(resultList,"li");
+            var imgContainer = document.getElementById("imgContainer");
+            clearElements(imgContainer,"svg");
+        }
+        
+        function showResult(index, svg, image){
+            var result = results[index];
+            var points = getPointsData(result,image);
+            
+            var polygon = document.createElementNS("http://www.w3.org/2000/svg","polygon");
+            polygon.setAttribute("points",points);
+            polygon.setAttribute("class","barcode-polygon");
+            polygon.setAttribute("onmouseover","mouseover(this)");
+            polygon.setAttribute("index",index);
+            
+            var text = "";
+            if ("barcodeText" in result){
+                text = result.barcodeText;
+            }
+            
+            if ("text" in result){
+                text = result.text;
+            }
+            var title = document.createElementNS("http://www.w3.org/2000/svg","title");
+            title.textContent = text;
+            polygon.append(title);
+            
+            
+            svg.append(polygon);
+            
+            var resultList = document.getElementById("result-list");
+            var listItem = document.createElement("li");
+            listItem.innerText=text;
+            listItem.setAttribute("index",index);
+            resultList.append(listItem);
+        }
+        
+        function mouseover(polygon){
+            console.log(polygon.getAttribute("index"));
+        }
+        
+        function getPointsData(result,image){
+            //var ratio = image.naturalWidth/image.width;
+            var pointsData = result.x1+","+result.y1 + " ";
+            pointsData = pointsData+ result.x2+","+result.y2 + " ";
+            pointsData = pointsData+ result.x3+","+result.y3 + " ";
+            pointsData = pointsData+ result.x4+","+result.y4;
+            return pointsData;
+        }
+        
+        function getImageData(){
+            var imgContainer =document.getElementById("imgContainer");
+            var img = imgContainer.getElementsByTagName("img")[0];
+            return img.src;
+        }
+        
+        function loadfile() { 
+            let name = document.getElementById('barcode-file');
+            if (name.files.length == 0) {
+                return;
+            }
+            showLocalImage(name.files)
+        }
+        
+        function convertImageAsJPG(img){
+            if (img.src.startsWith("data")){
+                var url = "convert_base64";
+                var xhr = new XMLHttpRequest();
+                var pay_load = {};
+                var base64 = getImageData();
+                base64 = base64.substring(base64.indexOf(",")+1,base64.length) 
+                pay_load["base64"] = base64;
+                
+                xhr.open('POST', url);
+                xhr.setRequestHeader('content-type', 'application/json'); 
+
+                xhr.onreadystatechange = function(){
+                    if(xhr.readyState === 4){
+                        console.log(xhr.status);
+                        console.log(xhr.responseText);
+                        if (xhr.status==200){
+                            img.src = "data:image/jpeg;base64,"+xhr.responseText;
+                        }
+                    }
+                }
+                xhr.send(JSON.stringify(pay_load));
+            }
+        }
+        
+        function showLocalImage(files){
+            clearPreviousResults();
+            var imgContainer =document.getElementById("imgContainer");
+            imgContainer.innerHTML="";
+            for(let i = 0; i < files.length; ++i){
+                var file = files[i];
+                thisType = file.type,
+                thisSize = file.size,
+                fileReader = new FileReader();
+                fileReader.onload = function(e){
+                    appendImg(e.target.result);
+                };
+                fileReader.onerror = function () {
+                    console.warn('oops, something went wrong.');
+                };
+                fileReader.readAsDataURL(file);	
+            }
+        }
+        
+        function appendImg(data){
+            var imgContainer =document.getElementById("imgContainer");
+            img = document.createElement("img");
+            img.src = data;
+            img.style="width:100%;max-width:700px;"
+            imgContainer.append(img);
+            if (imageUnsupported(img.src)){
+                convertImageAsJPG(img);
+            }
+        }
+        
+        function imageUnsupported(src){
+            if (src.indexOf("tif")!=-1){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        
+        function clearElements(parent,tagName){
+            var elements=parent.getElementsByTagName(tagName);
+            while (elements.length>0){
+                var ele=elements[0];
+                ele.remove();
+            }
+        }
+        
+        function showGroundTruth(){
+            var url = "/session/"+getSessionID()+"/ground_truth/"+encodeURIComponent(getFilename());
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url);
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState === 4){
+                    console.log(xhr.status);
+                    console.log(xhr.responseText);
+                    updateStatus("");
+                    if (xhr.status==200){
+                        results = JSON.parse(xhr.responseText)["ground_truth"];
+                        showResults(results);
+                    }
+                }
+            }
+            xhr.send();
+        }
+        
+        function exportAsGroundTruth() {
+            var groundTruthList = [];
+            var polygons = document.getElementsByTagName("polygon");
+            for (var i=0;i<polygons.length;i++){
+                var polygon = polygons[i];
+                points = polygon.points;
+                var groundTruth = {};
+                groundTruth["text"] = polygon.getElementsByTagName("title")[0].textContent;
+                for (var j=0;j<4;j++){
+                    groundTruth["x"+(j+1)] = points[j].x;
+                    groundTruth["y"+(j+1)] = points[j].y;
+                }
+                groundTruthList.push(groundTruth);
+            }
+            var json = JSON.stringify(groundTruthList);
+            var filename = getFilename()+".txt";
+            var link = document.createElement('a');
+            link.style.display = 'none';
+            link.setAttribute('target', '_blank');
+            link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(json));
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+
+</html>
