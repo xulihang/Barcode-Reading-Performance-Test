@@ -212,7 +212,7 @@ opencv_wechat,OpenCV Wechat</textarea>
         
         var image_categories_group = [];
         var group_num = parseInt(document.getElementById("group-num").value);
-        if (image_categories.length>group_num) {
+        if (image_categories.length>=group_num) {
             var number_per_group = Math.ceil(image_categories.length/group_num)
             for (var i=0;i<group_num;i++) {
                 var s = [];
@@ -243,7 +243,7 @@ opencv_wechat,OpenCV Wechat</textarea>
                 chart.style.height = "400px";
                 chart.className = chartClass;
                 chartsContainer.append(chart);
-                var myChart = echarts.init(chart);
+                var myChart = echarts.init(chart, null, {renderer: 'svg'});
                 option = {
                     tooltip: {
                         trigger: 'axis',
@@ -273,7 +273,7 @@ opencv_wechat,OpenCV Wechat</textarea>
                             axisTick: {show: false},
                             data: cats,
                             axisLabel:{
-                                rotate: 45,
+                                rotate: 0,
                                 interval: 0
                             
                             }
@@ -359,7 +359,7 @@ opencv_wechat,OpenCV Wechat</textarea>
             chart.style.height = "400px";
             chart.className = chartClass;
             chartsContainer.append(chart);
-            var myChart = echarts.init(chart);
+            var myChart = echarts.init(chart, null, {renderer: 'svg'});
             option = {
                 tooltip: {
                     trigger: 'axis',
