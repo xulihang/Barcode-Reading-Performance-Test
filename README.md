@@ -13,6 +13,7 @@ SDKs included:
 7. [ZXing](https://github.com/zxing/zxing/)
 8. [OpenCV Wechat QR Detector](https://github.com/opencv/opencv_contrib/tree/master/modules/wechat_qrcode)
 9. [Boofcv](https://boofcv.org/)
+10. [Accusoft BarcodeXpress](https://www.accusoft.com/products/barcode-xpress-collection/barcode-xpress/)
 
 ## Installation
 
@@ -24,7 +25,7 @@ Optional:
 
 Some barcode reading SDKs don't provide a Python library. For such cases, we can create a command line tool using the provided SDKs and communicate with the server with [ZeroMQ](https://zeromq.org/).
 
-This is how Scandit and ZXing are integrated. You can see the example here: <https://github.com/xulihang/BarcodeReader_CommandLine/>
+This is how Scandit, Accusoft and ZXing are integrated. You can see the example here: <https://github.com/xulihang/BarcodeReader_CommandLine/>
 
 You have to put the commandline executive files under the `commandline` folder.
 
