@@ -93,7 +93,7 @@
     <div class="container">
         <div class="left-container">
             <div id="resultContainer">
-                Result:
+                <span id="result-header">Result:</span>
                 <ol id="result-list"></ol>
                 <button type="button" onclick='saveChanges()'>Save Changes</button>
                 <button type="button" onclick='exportAsGroundTruth()'>Export as Ground Truth</button>
@@ -240,7 +240,9 @@
                     console.log(xhr.responseText);
                     updateStatus("");
                     if (xhr.status==200){
-                        results = JSON.parse(xhr.responseText)["results"];
+                        var returnedResult = JSON.parse(xhr.responseText);
+                        results = returnedResult["results"];
+                        document.getElementById("result-header").innerText="Results"+" (" +returnedResult["elapsedTime"]+ "ms)"+":"
                         showResults(results);
                     }
                 }
