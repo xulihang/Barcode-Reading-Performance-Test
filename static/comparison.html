@@ -88,7 +88,7 @@ opencv_wechat,OpenCV Wechat</textarea>
                     chk.checked = true;
                     chk.value = engine;
                     lbl.append(chk);
-                    lbl.append(namesDict[engine]);
+                    lbl.append(getDisplayName(engine));
                     container.append(lbl);
                 }
             }
@@ -195,7 +195,7 @@ opencv_wechat,OpenCV Wechat</textarea>
         var engines = getEnabledEngines();
         var engine_names = [];
         for (var i=0;i<engines.length;i++){
-            engine_names.push(namesDict[engines[i]]);
+            engine_names.push(getDisplayName(engines[i]));
         }
         
         //var engines_data = data_in_categories[category];
@@ -252,7 +252,8 @@ opencv_wechat,OpenCV Wechat</textarea>
                         }
                     },
                     legend: {
-                        data: engine_names
+                        data: engine_names,
+                        show: false
                     },
                     toolbox: {
                         show: true,
@@ -320,9 +321,8 @@ opencv_wechat,OpenCV Wechat</textarea>
                 data.push(value);
             }
             
-            
             serie = {
-                        name: namesDict[engine], 
+                        name: getDisplayName(engine), 
                         type: 'bar',
                         barGap: 0, 
                         label: labelOption, 
@@ -347,7 +347,7 @@ opencv_wechat,OpenCV Wechat</textarea>
         var engines = getEnabledEngines();
         var engine_names = [];
         for (var i=0;i<engines.length;i++) {
-            engine_names.push(namesDict[engines[i]]);
+            engine_names.push(getDisplayName(engines[i]));
         }
         var categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
         for (var i=0;i<categories.length;i++){
@@ -448,7 +448,7 @@ opencv_wechat,OpenCV Wechat</textarea>
             var engine = engines[i];
             var row = document.createElement('tr');
             var data = [];
-            data.push(namesDict[engine]);
+            data.push(getDisplayName(engine));
             total = 0;
             for (var category in data_in_categories) {
                 var engines_data = data_in_categories[category];
@@ -508,7 +508,7 @@ opencv_wechat,OpenCV Wechat</textarea>
         for (var i=0;i<engines.length;i++) {
             var engine = engines[i];
             serie = {
-                        name: namesDict[engine], 
+                        name: getDisplayName(engine), 
                         type: 'bar', 
                         barGap: 0, 
                         label: labelOption, 
@@ -728,7 +728,8 @@ opencv_wechat,OpenCV Wechat</textarea>
     }
     
     function loadDisplayName(){
-        var lines = document.getElementsByTagName("textarea")[0].textContent.split("\n");
+        var lines = document.getElementsByTagName("textarea")[0].value.split("\n");
+        console.log(lines);
         for (var i=0;i<lines.length;i++) {
             var line = lines[i];
             
@@ -737,8 +738,17 @@ opencv_wechat,OpenCV Wechat</textarea>
     }
     
     function updateDisplayName(){
+        console.log("Updating display name");
         loadDisplayName();
         loadEngines();
+    }
+    
+    function getDisplayName(engine){
+        if (engine in namesDict){
+            return namesDict[engine];
+        }else{
+            return engine;
+        }
     }
     
 </script>

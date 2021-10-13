@@ -55,6 +55,9 @@ class Batch_session():
         if self.engine == "dynamsoft" or self.engine == "":
             from barcode_reader.dynamsoft import DynamsoftBarcodeReader
             self.reader = DynamsoftBarcodeReader()
+        elif self.engine == "DBR 8.8":
+            from barcode_reader.commandline import CommandLineBarcodeReader
+            self.reader = CommandLineBarcodeReader(port=6666,config_path="dbr88_commandline")
         elif self.engine == "commandline":
             from barcode_reader.commandline import CommandLineBarcodeReader
             self.reader = CommandLineBarcodeReader()
