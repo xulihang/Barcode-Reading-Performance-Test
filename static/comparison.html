@@ -43,7 +43,7 @@
         </div>
         
         <div>
-            Display Name Settings:
+            Display Name Settings for engines:
             </br>
             <textarea>dynamsoft,DBR
 accusoft,Commercial SDK A
@@ -54,16 +54,24 @@ zbar,Zbar
 ean13,EAN13
 opencv1d,OpenCV 1D
 boofcv,BoofCV
-opencv_wechat,OpenCV Wechat</textarea>
+opencv_wechat,OpenCV Wechat</textarea></br>
+            Display Name Settings for categories:
+            </br>
+            <textarea>
+accuracy,Reading Rate
+precision,Precision
+f1score,F1-Score,
+time_elapsed,Time Elapsed
+average_time,Average Time
+            </textarea></br>
             <button type="button" onclick='updateDisplayName()'>Update Display Name</button>
         </div>
     </div>
 <script>
     get_session_id();
-    loadCategories();
     var namesDict = {};
-    loadDisplayName();
-    loadEngines();
+    var categoryNamesDict = {};
+    updateDisplayName();
     
     function inCategories(){
         return document.getElementById("in-categories").checked;
@@ -107,7 +115,7 @@ opencv_wechat,OpenCV Wechat</textarea>
             chk.checked = true;
             chk.value = category;
             lbl.append(chk);
-            lbl.append(category);
+            lbl.append(getDisplayNameOfCategory(category));
             container.append(lbl);
         }
     }
@@ -387,7 +395,7 @@ opencv_wechat,OpenCV Wechat</textarea>
                     {
                         type: 'category',
                         axisTick: {show: false},
-                        data: [category]
+                        data: [getDisplayNameOfCategory(category)]
                     }
                 ],
                 yAxis: [
@@ -408,7 +416,7 @@ opencv_wechat,OpenCV Wechat</textarea>
         var table_categories = getEnabledMetrics();
         for (var i=0;i<table_categories.length;i++) {
             var h2 = document.createElement("h2");
-            h2.innerText = table_categories[i];
+            h2.innerText = getDisplayNameOfCategory(table_categories[i]);
             var table = createTableOfOneCategory(table_categories[i],data_in_categories);
             container.append(h2);
             container.append(table);
@@ -727,20 +735,22 @@ opencv_wechat,OpenCV Wechat</textarea>
         }
     }
     
-    function loadDisplayName(){
-        var lines = document.getElementsByTagName("textarea")[0].value.split("\n");
+    function loadDisplayName(index,targetDict){
+        var lines = document.getElementsByTagName("textarea")[index].value.split("\n");
         console.log(lines);
         for (var i=0;i<lines.length;i++) {
             var line = lines[i];
             
-            namesDict[line.split(",")[0]]=line.split(",")[1];
+            targetDict[line.split(",")[0]]=line.split(",")[1];
         }
     }
     
     function updateDisplayName(){
         console.log("Updating display name");
-        loadDisplayName();
+        loadDisplayName(0,namesDict);
+        loadDisplayName(1,categoryNamesDict);
         loadEngines();
+        loadCategories();
     }
     
     function getDisplayName(engine){
@@ -748,6 +758,14 @@ opencv_wechat,OpenCV Wechat</textarea>
             return namesDict[engine];
         }else{
             return engine;
+        }
+    }
+    
+    function getDisplayNameOfCategory(name){
+        if (name in categoryNamesDict){
+            return categoryNamesDict[name];
+        }else{
+            return name;
         }
     }
     
