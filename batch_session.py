@@ -152,12 +152,12 @@ class Batch_session():
     def start_reading(self, engine="dynamsoft"):
         self.init_reader(engine)
         self.reading = True
-        if self.engine == "commandline":
+        if str(self.reader.__class__).find("CommandLine")!=-1:
             self.reader.start_commandline_zmq_server_if_unstarted()
         threading.Thread(target=self.decode_and_save_results, args=()).start()
         
     def stop_reading(self):
-        if self.engine == "commandline":
+        if str(self.reader.__class__).find("CommandLine")!=-1:
             self.reader.stop_commandline_zmq_server_if_started()
         self.reading = False
             
@@ -227,6 +227,7 @@ class Batch_session():
         return []
     
     def get_statistics(self, engine="dynamsoft", copy_failed=True, files_list=[]):
+        print("get statistics of "+engine)
         if len(files_list)==0:
             files_list=self.files_list
         data = {}
