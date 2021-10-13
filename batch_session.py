@@ -292,6 +292,8 @@ class Batch_session():
                 image_decoding_result["failed"] = failed
                 if failed == True and copy_failed == True:
                     self.copy_undetected_to_failed_folder(filename, engine)
+            else:
+                undetected_images = total_images
         self.append_statistics("",total_images,undetected_images,wrong_detected_images, data)
         self.append_statistics("_barcodes",total_barcodes,undetected_barcodes,wrong_detected_barcodes, data)
         data["img_results"] = img_results
