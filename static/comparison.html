@@ -107,6 +107,7 @@ average_time,Average Time
     function loadCategories(){
         var categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
         var container = document.getElementById("metrics");
+        container.innerHTML="Metrics: ";
         for (var i=0;i<categories.length;i++) {
             var category = categories[i];
             var lbl = document.createElement("label");
@@ -121,11 +122,17 @@ average_time,Average Time
     }
     
     function getEnabledEngines() {
-        return getEnabledData("engines");
+        enabled = getEnabledData("engines");
+        console.log("Enabled engines:")
+        console.log(enabled)
+        return enabled;
     }
     
     function getEnabledMetrics() {
-        return getEnabledData("metrics");
+        enabled = getEnabledData("metrics");
+        console.log("Enabled metrics:")
+        console.log(enabled)
+        return enabled;
     }
     
     function getEnabledData(elementId){
@@ -167,6 +174,7 @@ average_time,Average Time
                         data_in_categories[category]=engine_data;
                         //drawChart(engine_data,false);
                     }
+                    drawChartInCategories(data_in_categories);
                 } else{
                     var engine_data = get_engines_data(data);
                     data_in_categories["Result"] = engine_data;
@@ -178,7 +186,7 @@ average_time,Average Time
                 //d["lots"] = data_in_categories["lots"];
                 //delete data_in_categories["lots"];
                 //data_in_categories = d;
-                drawChartInCategories(data_in_categories);
+                
                 
                 createOverviewTable(data_in_categories);
                 
@@ -357,7 +365,7 @@ average_time,Average Time
         for (var i=0;i<engines.length;i++) {
             engine_names.push(getDisplayName(engines[i]));
         }
-        var categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
+        var categories = getEnabledMetrics();
         for (var i=0;i<categories.length;i++){
             var category = categories[i];
             var chartClass = category.replace("_","");
