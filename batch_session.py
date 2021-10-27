@@ -67,6 +67,9 @@ class Batch_session():
         elif self.engine == "accusoft":
             from barcode_reader.commandline import CommandLineBarcodeReader
             self.reader = CommandLineBarcodeReader(port=5558,config_path="accusoft_commandline")
+        elif self.engine == "aspose":
+            from barcode_reader.aspose import AsposeBarcodeReader
+            self.reader = AsposeBarcodeReader()
         elif self.engine == "zxing":
             from barcode_reader.commandline import CommandLineBarcodeReader
             self.reader = CommandLineBarcodeReader(port=5557, config_path="zxing_commandline")

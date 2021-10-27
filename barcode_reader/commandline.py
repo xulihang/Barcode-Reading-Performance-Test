@@ -57,8 +57,10 @@ class CommandLineBarcodeReader():
         return result_dict
         
 if __name__ == '__main__':
+    #reader = CommandLineBarcodeReader()
     #reader = CommandLineBarcodeReader(config_path="zxing_commandline",port=5557)
-    reader = CommandLineBarcodeReader()
+    reader = CommandLineBarcodeReader(config_path="dbr88_commandline",port=6666)
+    
     results = reader.decode_file("D:\\test\\BarcodePerformance\\new\\black_qr_code.png")
     print(results)
     reader.stop_commandline_zmq_server_if_started()

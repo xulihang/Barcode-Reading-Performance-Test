@@ -1,1 +1,1 @@
-engines = ["dynamsoft","DBR 8.8","accusoft","scandit","zxing","zxingcpp","zbar","ean13","opencv1d","boofcv","opencv_wechat"]
+engines = ["dynamsoft","DBR 8.8","accusoft","aspose","scandit","zxing","zxingcpp","zbar","ean13","opencv1d","boofcv","opencv_wechat"]
