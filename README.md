@@ -1,6 +1,6 @@
 # Barcode Reading Performance Test Tool
 
-This is a tool to test the performance of different barcode reading SDKs. It is designed to test a dataset of barcode images with ground truth. It uses a B/S architecture with Python Flask as its backend.
+This is a benchmark tool to test the performance of different barcode reading SDKs. It is designed to test a dataset of barcode images with ground truth. It uses a B/S architecture with Python Flask as its backend.
 
 SDKs included:
 
@@ -14,6 +14,7 @@ SDKs included:
 8. [OpenCV Wechat QR Detector](https://github.com/opencv/opencv_contrib/tree/master/modules/wechat_qrcode)
 9. [Boofcv](https://boofcv.org/)
 10. [Accusoft BarcodeXpress](https://www.accusoft.com/products/barcode-xpress-collection/barcode-xpress/)
+11. [Aspose.Barcode](https://downloads.aspose.com/barcode/python)
 
 ## Installation
 
@@ -93,4 +94,8 @@ There are some existing public datasets available. Scripts to generate ground tr
 * [Boofcv's performance test](https://boofcv.org/index.php?title=Performance:QrCode)
 * [Wounded QR codes](https://www.datagenetics.com/blog/november12013/index.html)
 
+## Blogs
+
+* [QR Code Reading Benchmark and Comparison](https://www.dynamsoft.com/codepool/qr-code-reading-benchmark-and-comparison.html)
+* [Barcode Scanning Accuracy Benchmark and Comparison](https://www.dynamsoft.com/blog/insights/barcode-scanning-accuracy-benchmark-and-comparison/)
 
