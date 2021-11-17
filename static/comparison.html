@@ -32,6 +32,9 @@
         <div id="metrics">
         Metrics: 
         </div>
+        <div id="normalize">
+        Normalize: 
+        </div>
         <div id="overview-table"></div>
         <div id="charts" style="display:none;"></div>
 
@@ -63,7 +66,8 @@ precision,Precision
 f1score,F1-Score,
 time_elapsed,Time Elapsed
 average_time,Average Time
-            </textarea></br>
+            </textarea>
+            </br>
             <button type="button" onclick='updateDisplayName()'>Update Display Name</button>
         </div>
     </div>
@@ -105,33 +109,39 @@ average_time,Average Time
     }
     
     function loadCategories(){
-        var categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
-        var container = document.getElementById("metrics");
-        container.innerHTML="Metrics: ";
-        for (var i=0;i<categories.length;i++) {
-            var category = categories[i];
-            var lbl = document.createElement("label");
-            var chk = document.createElement("input");
-            chk.type = "checkbox";
-            chk.checked = true;
-            chk.value = category;
-            lbl.append(chk);
-            lbl.append(getDisplayNameOfCategory(category));
-            container.append(lbl);
+        var containers = ["metrics","normalize"];
+        for (var i=0;i<containers.length;i++) {
+            var name = containers[i];
+            var categories = ["accuracy","precision","f1score","time_elapsed","average_time"];
+            var container = document.getElementById(name);
+            container.innerHTML=name+": ";
+            for (var j=0;j<categories.length;j++) {
+                var category = categories[j];
+                var lbl = document.createElement("label");
+                var chk = document.createElement("input");
+                chk.type = "checkbox";
+                chk.checked = true;
+                chk.value = category;
+                lbl.append(chk);
+                lbl.append(getDisplayNameOfCategory(category));
+                container.append(lbl);
+            }
         }
+        
     }
     
     function getEnabledEngines() {
         enabled = getEnabledData("engines");
-        console.log("Enabled engines:")
-        console.log(enabled)
         return enabled;
     }
     
     function getEnabledMetrics() {
         enabled = getEnabledData("metrics");
-        console.log("Enabled metrics:")
-        console.log(enabled)
+        return enabled;
+    }
+    
+    function getEnabledNormalization () {
+        enabled = getEnabledData("normalize");
         return enabled;
     }
     
@@ -174,6 +184,7 @@ average_time,Average Time
                         data_in_categories[category]=engine_data;
                         //drawChart(engine_data,false);
                     }
+                    normalizeData(data_in_categories);
                     drawChartInCategories(data_in_categories);
                 } else{
                     var engine_data = get_engines_data(data);
@@ -194,6 +205,52 @@ average_time,Average Time
         }
         var json = JSON.stringify(pay_load);
         xhr.send(json);
+    }
+    
+    //e.g. {"blurred":{"DBR":{"accuracy":0.8}}}
+    function normalizeData(data_in_categories){
+        console.log(data_in_categories);
+        var metrices = getEnabledMetrics();
+        var engines = getEnabledEngines();
+        var normalization = getEnabledNormalization();
+        for (var category in data_in_categories) {
+            console.log(category);
+            for (var i=0;i<metrices.length;i++) {
+                metric = metrices[i];
+                console.log(metric);
+                if (normalization.indexOf(metric)!=-1){
+                    var maxValue=0;
+                    var minValue=data_in_categories[category][engines[0]][metric];
+                    var total = 0;
+                    for (var j=0;j<engines.length;j++) {
+                        var engine = engines[j];
+                        data = data_in_categories[category][engine][metric];
+                        data = parseFloat(data);
+                        maxValue = Math.max(maxValue,data);
+                        minValue = Math.min(minValue,data);
+                        total = total + data;
+                    }
+                    var average = total / engines.length;
+                    for (var j=0;j<engines.length;j++) {
+                        var engine = engines[j];
+                        data = data_in_categories[category][engine][metric];
+                        var normalizedValue = data/maxValue*100;
+                        //var normalizedValue = (data - minValue)/(maxValue - minValue)*100; //min-max
+                        //var normalizedValue = ((data - average)/(maxValue - minValue)).toFixed(2); //mean
+                        
+                        //var normalizedValue = log(10,data)*100; // use log
+                        if (parseInt(normalizedValue)!=100 && parseInt(normalizedValue)!=0){
+                            normalizedValue = normalizedValue.toFixed(2);
+                        }
+                        data_in_categories[category][engine][metric] = normalizedValue;
+                    }
+                }
+            }
+        }
+    }
+    
+    function log(base,value){
+        return Math.log(value) / Math.log(base)
     }
     
     function drawChartInCategories(data_in_categories, clear){
@@ -269,7 +326,7 @@ average_time,Average Time
                     },
                     legend: {
                         data: engine_names,
-                        show: false
+                        show: true
                     },
                     toolbox: {
                         show: true,
