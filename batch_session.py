@@ -334,10 +334,15 @@ class Batch_session():
         barcodeFormat = ""
         undetected_barcodes = []
         wrong_detected_barcodes = []
+        correctly_detected_barcodes = []
         some_detected = False
+        copied_results = []
+        for result in results:
+            copied_results.append(result)
+            
         for ground_truth in ground_truth_list:
             detected = False
-            for result in results:
+            for result in copied_results:
                 if result["y1"] != result["y4"]: # not a line
                     if "x1" in ground_truth: #if there is localization markup
                         detection_points = geometry_utils.points_of_one_detection_result(result)
@@ -349,18 +354,22 @@ class Batch_session():
                 if correct:
                     detected = True
                     some_detected = True
+                    correctly_detected_barcodes.append(result)
+                    copied_results.remove(result)
+                    if result in wrong_detected_barcodes:
+                        wrong_detected_barcodes.remove(result)
                     break
                 else:
-                    if result not in wrong_detected_barcodes:
-                        wrong_detected_barcodes.append(result)
+                    if result not in correctly_detected_barcodes:
+                        if result not in wrong_detected_barcodes:
+                            wrong_detected_barcodes.append(result)
             if detected == False:
                 failed = True
-                if ground_truth not in undetected_barcodes:
-                    undetected_barcodes.append(ground_truth)
+                undetected_barcodes.append(ground_truth)
         if len(undetected_barcodes) == 0: #ignore over detected barcodes
             wrong_detected_barcodes = []
         return failed, some_detected, len(undetected_barcodes), len(wrong_detected_barcodes)
-        
+
     def is_text_correct(self, result,ground_truth):
         detected_text = result["barcodeText"].strip()
         ground_truth_text = ground_truth["text"].strip()
