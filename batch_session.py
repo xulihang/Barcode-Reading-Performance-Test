@@ -355,12 +355,12 @@ class Batch_session():
                     detected = True
                     some_detected = True
                     correctly_detected_barcodes.append(result)
-                    copied_results.remove(result)
-                    if result in wrong_detected_barcodes:
+                    copied_results.remove(result) # to meet duplicate ground truth
+                    if result in wrong_detected_barcodes: # to ignore order
                         wrong_detected_barcodes.remove(result)
                     break
                 else:
-                    if result not in correctly_detected_barcodes:
+                    if result not in correctly_detected_barcodes: # to ignore order
                         if result not in wrong_detected_barcodes:
                             wrong_detected_barcodes.append(result)
             if detected == False:
