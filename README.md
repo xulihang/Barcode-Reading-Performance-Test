@@ -15,6 +15,9 @@ SDKs included:
 9. [Boofcv](https://boofcv.org/)
 10. [Accusoft BarcodeXpress](https://www.accusoft.com/products/barcode-xpress-collection/barcode-xpress/)
 11. [Aspose.Barcode](https://downloads.aspose.com/barcode/python)
+12. [Google ML Kit](https://developers.google.com/ml-kit/)
+13. [Apple Vision Framework](https://developer.apple.com/documentation/vision)
+
 
 ## Installation
 
@@ -24,11 +27,18 @@ pip install -r requirements.txt
 
 Optional: 
 
-Some barcode reading SDKs don't provide a Python library. For such cases, we can create a command line tool using the provided SDKs and communicate with the server with [ZeroMQ](https://zeromq.org/).
+* Integration using ZeroMQ
 
-This is how Scandit, Accusoft and ZXing are integrated. You can see the example here: <https://github.com/xulihang/BarcodeReader_CommandLine/>
+    Some barcode reading SDKs don't provide a Python library. For such cases, we can create a command line tool using the provided SDKs and communicate with the server with [ZeroMQ](https://zeromq.org/).
 
-You have to put the commandline executive files under the `commandline` folder.
+    This is how Scandit, Accusoft and ZXing are integrated. You can see the example here: <https://github.com/xulihang/BarcodeReader_CommandLine/>
+
+    You have to put the commandline executive files under the `commandline` folder.
+
+* Integration using HTTP
+
+    For mobile SDKs, we can run an HTTP server on the phone and make HTTP requests for decoding. The app's source code: <https://github.com/xulihang/Mobile-Barcode-SDK-Aggregator>.
+
 
 ## How to Use
 
