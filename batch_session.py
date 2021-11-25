@@ -383,10 +383,10 @@ class Batch_session():
         if barcodeFormat.upper().find("UPC") != -1:
             if len(detected_text) == 12:
                 detected_text = "0" + detected_text
-        if detected_text.find(ground_truth_text) == -1:
-            return False
-        else:
+        if detected_text == ground_truth_text:
             return True
+        else:
+            return False
     
     def copy_undetected_to_failed_folder(self, filename, engine="dynamsoft"):
         img_path = os.path.join(self.img_folder,filename)
