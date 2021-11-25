@@ -91,6 +91,12 @@ class Batch_session():
         elif self.engine == "opencv_wechat":
             from barcode_reader.opencv_wechat_qrcode import OpenCVWechatQrReader
             self.reader = OpenCVWechatQrReader()
+        elif self.engine == "ML Kit":
+            from barcode_reader.http_barcodereader import HTTPBarcodeReader
+            self.reader = HTTPBarcodeReader(sdk="MLKit")
+        elif self.engine == "Apple Vision":
+            from barcode_reader.http_barcodereader import HTTPBarcodeReader
+            self.reader = HTTPBarcodeReader(sdk="AppleVision")
             
     def update_dbr_runtime_settings_if_needed(self, img_path):
         if self.engine == "dynamsoft" or self.engine == "":

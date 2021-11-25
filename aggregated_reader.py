@@ -47,6 +47,12 @@ class AggregatedReader():
         elif self.engine == "opencv_wechat":
             from barcode_reader.opencv_wechat_qrcode import OpenCVWechatQrReader
             self.reader = OpenCVWechatQrReader()
+        elif self.engine == "ML Kit":
+            from barcode_reader.http_barcodereader import HTTPBarcodeReader
+            self.reader = HTTPBarcodeReader(sdk="MLKit")
+        elif self.engine == "Apple Vision":
+            from barcode_reader.http_barcodereader import HTTPBarcodeReader
+            self.reader = HTTPBarcodeReader(sdk="AppleVision")
     
     def decode_file(self, file_path,settings=""):
         if settings!="":
