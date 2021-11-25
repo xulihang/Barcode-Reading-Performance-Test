@@ -38,6 +38,8 @@ Optional:
 * Integration using HTTP
 
     For mobile SDKs, we can run an HTTP server on the phone and make HTTP requests for decoding. The app's source code: <https://github.com/xulihang/Mobile-Barcode-SDK-Aggregator>.
+    
+    The app can run on a simulator/emulator for a better performance.
 
 
 ## How to Use
