@@ -53,6 +53,12 @@ class AggregatedReader():
         elif self.engine == "Apple Vision":
             from barcode_reader.http_barcodereader import HTTPBarcodeReader
             self.reader = HTTPBarcodeReader(sdk="AppleVision")
+        elif self.engine == "Scandit 6.x":
+            from barcode_reader.http_barcodereader import HTTPBarcodeReader
+            self.reader = HTTPBarcodeReader(sdk="Scandit")
+        elif self.engine == "Object Detector":
+            from barcode_reader.object_detection import ObjectDetector
+            self.reader = ObjectDetector()
     
     def decode_file(self, file_path,settings=""):
         if settings!="":

@@ -97,6 +97,12 @@ class Batch_session():
         elif self.engine == "Apple Vision":
             from barcode_reader.http_barcodereader import HTTPBarcodeReader
             self.reader = HTTPBarcodeReader(sdk="AppleVision")
+        elif self.engine == "Scandit 6.x":
+            from barcode_reader.http_barcodereader import HTTPBarcodeReader
+            self.reader = HTTPBarcodeReader(sdk="Scandit")
+        elif self.engine == "Object Detector":
+            from barcode_reader.object_detection import ObjectDetector
+            self.reader = ObjectDetector()
             
     def update_dbr_runtime_settings_if_needed(self, img_path):
         if self.engine == "dynamsoft" or self.engine == "":
