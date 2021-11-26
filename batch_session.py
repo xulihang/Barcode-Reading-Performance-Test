@@ -385,6 +385,9 @@ class Batch_session():
     def is_text_correct(self, result,ground_truth):
         detected_text = result["barcodeText"].strip()
         ground_truth_text = ground_truth["text"].strip()
+        if ground_truth_text == "":
+            return True
+            
         barcodeFormat = result["barcodeFormat"]
         if barcodeFormat.upper().find("UPC") != -1:
             if len(detected_text) == 12:
