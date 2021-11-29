@@ -11,15 +11,27 @@ class DynamsoftBarcodeReader():
             settings = self.dbr.get_runtime_settings()
             settings.intermediate_result_types = EnumIntermediateResultType.IRT_TYPED_BARCODE_ZONE
             self.dbr.update_runtime_settings(settings)
+        self.load_root_template_if_exists()
+
+    def load_root_template_if_exists(self):
         if os.path.exists("template.json"):
             print("Found template")
-            self.dbr.init_runtime_settings_with_file("template.json")
-
+            error = self.dbr.init_runtime_settings_with_file("template.json")
+            if error[0] != 0:
+                print(error[1])
+            else:
+                return True
+        return False
+                
     def set_runtime_settings_with_template(self, template):
-        self.dbr.init_runtime_settings_with_string(template, conflict_mode=EnumConflictMode.CM_OVERWRITE)
+        error = self.dbr.init_runtime_settings_with_string(template, conflict_mode=EnumConflictMode.CM_OVERWRITE)
+        if error[0] != 0:
+            print(error[1])
         
     def reset_runtime_settings(self):
-        self.dbr.reset_runtime_settings()
+        if self.load_root_template_if_exists() == False:
+            print("reset settings")
+            self.dbr.reset_runtime_settings()
         
     def decode_file(self, img_path, engine=""):
         result_dict = {}

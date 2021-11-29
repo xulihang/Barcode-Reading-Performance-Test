@@ -109,8 +109,9 @@ class Batch_session():
             parent_path = os.path.abspath(os.path.join(img_path, os.pardir))
             template_path = os.path.join(parent_path, "template.json")
             if self.current_template_path!=template_path:
+                self.current_template_path=template_path
                 if os.path.exists(template_path):
-                    self.current_template_path=template_path
+                    print(template_path)
                     f = open(template_path,"r")
                     settings = f.read()
                     f.close()
