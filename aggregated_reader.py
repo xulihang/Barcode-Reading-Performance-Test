@@ -59,6 +59,9 @@ class AggregatedReader():
         elif self.engine == "Object Detector":
             from barcode_reader.object_detection import ObjectDetector
             self.reader = ObjectDetector()
+        elif self.engine == "YOLODBR":
+            from barcode_reader.yolo_dbr import YOLODBR
+            self.reader = YOLODBR()
     
     def decode_file(self, file_path,settings=""):
         if settings!="":

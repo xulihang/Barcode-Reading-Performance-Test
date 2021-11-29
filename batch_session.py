@@ -103,6 +103,9 @@ class Batch_session():
         elif self.engine == "Object Detector":
             from barcode_reader.object_detection import ObjectDetector
             self.reader = ObjectDetector()
+        elif self.engine == "YOLODBR":
+            from barcode_reader.yolo_dbr import YOLODBR
+            self.reader = YOLODBR()
             
     def update_dbr_runtime_settings_if_needed(self, img_path):
         if self.engine == "dynamsoft" or self.engine == "":
