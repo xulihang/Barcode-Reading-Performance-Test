@@ -3,7 +3,7 @@ import cv2
 class ObjectDetector():
     def __init__(self):
         self.model = cv2.dnn_DetectionModel("yolov4-tiny-custom_last.weights","yolov4-tiny-custom.cfg")
-        self.model.setInputParams(size=(640, 640), scale=1/255, swapRB=True)
+        self.model.setInputParams(size=(416, 416), scale=1/255, swapRB=True)
 
     def decode_file(self, img_path,return_img=False):
         result_dict = {}
