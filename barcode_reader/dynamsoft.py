@@ -7,16 +7,21 @@ class DynamsoftBarcodeReader():
     def __init__(self,use_intermediate_detection_results=False):
         self.dbr = BarcodeReader()
         self.dbr.init_license("t0071fQAAAGq0DuY2Gzi1F+egy4FjulS8TP8ZQS1H6Myh5TPLJ7/oStYc9r1W8/tsqW2CTaa4ifPCRuU6KT1gBpi1BEwujp5XGxQ=")
-        if use_intermediate_detection_results:
+        self.use_intermediate_detection_results = use_intermediate_detection_results
+        self.load_root_template_if_exists()
+        self.update_intermediate_results_settings()
+
+    def update_intermediate_results_settings(self):
+        if self.use_intermediate_detection_results:
             settings = self.dbr.get_runtime_settings()
             settings.intermediate_result_types = EnumIntermediateResultType.IRT_TYPED_BARCODE_ZONE
             self.dbr.update_runtime_settings(settings)
-        self.load_root_template_if_exists()
-
+            
     def load_root_template_if_exists(self):
         if os.path.exists("template.json"):
             print("Found template")
             error = self.dbr.init_runtime_settings_with_file("template.json")
+            self.update_intermediate_results_settings()
             if error[0] != 0:
                 print(error[1])
             else:
@@ -24,14 +29,17 @@ class DynamsoftBarcodeReader():
         return False
                 
     def set_runtime_settings_with_template(self, template):
+        print(template)
         error = self.dbr.init_runtime_settings_with_string(template, conflict_mode=EnumConflictMode.CM_OVERWRITE)
         if error[0] != 0:
             print(error[1])
+        self.update_intermediate_results_settings()
         
     def reset_runtime_settings(self):
         if self.load_root_template_if_exists() == False:
             print("reset settings")
             self.dbr.reset_runtime_settings()
+            self.update_intermediate_results_settings()
         
     def decode_file(self, img_path, engine=""):
         result_dict = {}
@@ -50,7 +58,15 @@ class DynamsoftBarcodeReader():
         self.wrap_results(results,text_results)
         self.append_intermediate_results(results)
         result_dict["results"] = results
+        return result_dict
         
+    def decode_buffer(self, buffer):
+        result_dict = {}
+        results = []
+        text_results = self.dbr.decode_buffer(buffer)
+        self.wrap_results(results,text_results)
+        self.append_intermediate_results(results)
+        result_dict["results"] = results
         return result_dict
     
     def wrap_results(self,results,text_results):
