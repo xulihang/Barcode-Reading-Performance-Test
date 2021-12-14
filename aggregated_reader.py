@@ -56,12 +56,22 @@ class AggregatedReader():
         elif self.engine == "Scandit 6.x":
             from barcode_reader.http_barcodereader import HTTPBarcodeReader
             self.reader = HTTPBarcodeReader(sdk="Scandit")
+        elif self.engine == "DBR (iOS)":
+            from barcode_reader.http_barcodereader import HTTPBarcodeReader
+            self.reader = HTTPBarcodeReader(sdk="DBR")
+        elif self.engine == "ZXingObjC":
+            from barcode_reader.http_barcodereader import HTTPBarcodeReader
+            self.reader = HTTPBarcodeReader(sdk="ZXing")
         elif self.engine == "Object Detector":
             from barcode_reader.object_detection import ObjectDetector
             self.reader = ObjectDetector()
         elif self.engine == "YOLODBR":
             from barcode_reader.yolo_dbr import YOLODBR
             self.reader = YOLODBR()
+        elif self.engine == "libdmtx":
+            from barcode_reader.libdmtx import DMTX
+            self.reader = DMTX()    
+            
     
     def decode_file(self, file_path,settings=""):
         if settings!="":
