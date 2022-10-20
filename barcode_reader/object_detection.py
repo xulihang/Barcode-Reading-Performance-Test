@@ -2,7 +2,7 @@ import cv2
 
 class ObjectDetector():
     def __init__(self):
-        self.model = cv2.dnn_DetectionModel("yolov4-tiny-custom_last.weights","yolov4-tiny-custom.cfg")
+        self.model = cv2.dnn_DetectionModel("qrcode.weights","qrcode.cfg")
         self.model.setInputParams(size=(416, 416), scale=1/255, swapRB=True)
 
     def decode_file(self, img_path,return_img=False):
@@ -34,7 +34,7 @@ class ObjectDetector():
             bbox["width"] = int(width)
             bbox["height"] = int(height)
             result["bbox"] = bbox
-            result["confidence"] = float(scores[i][0])
+            result["confidence"] = float(scores[i])
             results.append(result)
         result_dict["results"] = results
         if return_img:
