@@ -18,6 +18,7 @@ SDKs included:
 12. [Google ML Kit](https://developers.google.com/ml-kit/)
 13. [Apple Vision Framework](https://developer.apple.com/documentation/vision)
 
+There is also a JavaScript version which runs purely in the browser: <https://github.com/tony-xlh/barcode-reading-benchmark>
 
 ## Installation
 
